@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar"; // <-- import du composant Navbar
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Providers from "./providers";          // SessionProvider
+import { CartProvider } from "@/context/CartContext";   // ← import du panier
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,10 +29,15 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 flex flex-col min-h-screen`}
       >
-        <Navbar />   {/* <-- ajout de la barre de navigation */}
-        {children}
+        <Providers>                 {/* SessionProvider */}
+          <CartProvider>            {/* Provider du panier */}
+            <Navbar />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+          </CartProvider>
+        </Providers>
       </body>
     </html>
   );

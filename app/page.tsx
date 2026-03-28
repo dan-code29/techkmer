@@ -1,16 +1,45 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import Carousel from '@/components/Carousel';
 
 export default function Home() {
+  // Liste des réalisations (remplacez par vos propres fichiers dans /public/realisations)
+  const realisations = [
+    { type: 'image', src: '/realisations/projet1.jpg', title: 'Rénovation électrique - Paris' },
+    { type: 'image', src: '/realisations/projet2.jpg', title: 'Installation domotique - Lyon' },
+    { type: 'video', src: '/realisations/video-demo.mp4', title: 'Démonstration installation' },
+  ];
+
   return (
     <div className="bg-gray-50">
-      {/* Hero */}
-      <section className="bg-blue-600 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Techkmer
-          </h1>
-          <p className="text-xl md:text-2xl mb-8">
-            Services techniques – Achat d’outils, installation, contact technicien, devis
+      {/* Bannière promotionnelle (fermable optionnel) */}
+      <div className="bg-yellow-500 text-gray-900 py-3 text-center font-semibold">
+        <div className="container mx-auto px-4">
+          🚨 PROMO D'ÉTÉ : -20% sur tous les outils jusqu'au 30 avril ! 
+          <Link href="/boutique" className="underline ml-2 hover:text-blue-800">
+            Profitez-en
+          </Link>
+        </div>
+      </div>
+
+      {/* Section Héros avec image de fond */}
+      <div className="relative bg-blue-600 text-white">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            alt="Atelier technique"
+            fill
+            className="object-cover opacity-20"
+            priority
+          />
+        </div>
+        <div className="relative z-10 container mx-auto px-4 py-20 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">Techkmer</h1>
+          <p className="text-xl md:text-2xl mb-6 max-w-3xl mx-auto">
+            Votre partenaire de confiance pour vos équipements électriques, informatiques et de sécurité électronique.
+          </p>
+          <p className="text-lg mb-8 max-w-2xl mx-auto">
+            De la vente à l'installation, jusqu'à la maintenance de vos équipements, nous vous accompagnons à chaque étape.
           </p>
           <Link
             href="/devis"
@@ -19,27 +48,69 @@ export default function Home() {
             Demander un devis
           </Link>
         </div>
-      </section>
+      </div>
 
-      {/* Services */}
+      {/* Section Services */}
       <section className="py-16 container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Nos services</h2>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            <div className="text-4xl mb-4">🛠️</div>
-            <h3 className="text-xl font-semibold mb-2">Achat d’outils</h3>
-            <p className="text-gray-600">Large gamme d’outils professionnels de qualité.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            <div className="text-4xl mb-4">🔧</div>
-            <h3 className="text-xl font-semibold mb-2">Installation</h3>
-            <p className="text-gray-600">Service d’installation par nos techniciens experts.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            <div className="text-4xl mb-4">👨‍🔧</div>
-            <h3 className="text-xl font-semibold mb-2">Recherche technicien</h3>
-            <p className="text-gray-600">Mise en relation avec un professionnel qualifié.</p>
-          </div>
+          {[
+            {
+              title: "Vente d'équipements",
+              desc: "Matériel informatique, sécurité électronique, électricité, domotique. Marques de qualité.",
+              img: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3785?w=800&auto=format",
+              alt: "Matériel"
+            },
+            {
+              title: "Installation & mise en service",
+              desc: "Installation de vos équipements par nos techniciens experts.",
+              img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format",
+              alt: "Installation"
+            },
+            {
+              title: "Maintenance & dépannage",
+              desc: "Intervention rapide pour particuliers et entreprises. Dépannage électrique, domotique, informatique.",
+              img: "https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?w=800&auto=format",
+              alt: "Maintenance"
+            }
+          ].map((service) => (
+            <div key={service.title} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+              <div className="relative h-48">
+                <Image src={service.img} alt={service.alt} fill className="object-cover" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
+                <p className="text-gray-600">{service.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Section Qui sommes-nous */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">Qui sommes-nous ?</h2>
+          <p className="text-gray-700 max-w-2xl mx-auto">
+            Techkmer est une entreprise spécialisée dans la vente de matériel informatique,
+            sécurité électronique, électricité et domotique. Nous accompagnons particuliers
+            et entreprises de l’installation à la maintenance, avec une équipe de techniciens
+            expérimentés et une volonté de vous offrir un service de qualité.
+          </p>
+          <Link
+            href="/about"
+            className="inline-block mt-6 text-blue-600 hover:underline font-medium"
+          >
+            En savoir plus →
+          </Link>
+        </div>
+      </section>
+
+      {/* Section Nos réalisations avec carrousel */}
+      <section className="py-16 bg-gray-100">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-8">Nos réalisations</h2>
+          <Carousel items={realisations} autoplay delay={4000} />
         </div>
       </section>
 
