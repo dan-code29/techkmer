@@ -2,6 +2,7 @@
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
 import { useState } from 'react';
+import { formatPrice } from '@/lib/format';
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
@@ -10,7 +11,6 @@ export default function CheckoutPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Ici vous pouvez envoyer la commande à votre API ou email
     console.log('Commande envoyée', { items, totalPrice, ...form });
     clearCart();
     setSubmitted(true);
@@ -47,12 +47,12 @@ export default function CheckoutPage() {
         {items.map((item) => (
           <div key={item.id} className="flex justify-between">
             <span>{item.name} x {item.quantity}</span>
-            <span>{(item.price * item.quantity).toFixed(2)} €</span>
+            <span>{formatPrice(item.price * item.quantity)}</span>
           </div>
         ))}
         <div className="border-t mt-2 pt-2 font-bold flex justify-between">
           <span>Total</span>
-          <span>{totalPrice.toFixed(2)} €</span>
+          <span>{formatPrice(totalPrice)}</span>
         </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">

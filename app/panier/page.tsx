@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { formatPrice } from '@/lib/format';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
@@ -28,7 +29,7 @@ export default function CartPage() {
             </div>
             <div className="flex-1 min-w-[150px]">
               <h2 className="font-semibold">{item.name}</h2>
-              <p className="text-gray-600">{item.price} €</p>
+              <p className="text-gray-600">{formatPrice(item.price)}</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -46,7 +47,7 @@ export default function CartPage() {
               </button>
             </div>
             <div className="w-24 text-right font-semibold">
-              {(item.price * item.quantity).toFixed(2)} €
+              {formatPrice(item.price * item.quantity)}
             </div>
             <button
               onClick={() => removeItem(item.id)}
@@ -58,7 +59,7 @@ export default function CartPage() {
         ))}
       </div>
       <div className="mt-8 border-t pt-4 text-right">
-        <p className="text-xl font-bold">Total : {totalPrice.toFixed(2)} €</p>
+        <p className="text-xl font-bold">Total : {formatPrice(totalPrice)}</p>
         <div className="mt-4 flex gap-4 justify-end">
           <button
             onClick={clearCart}

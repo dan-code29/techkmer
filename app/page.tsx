@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Carousel from '@/components/Carousel';
+import ClientLatestProducts from '@/components/ClientLatestProducts';
 
 export default function Home() {
-  // Liste des réalisations (remplacez par vos propres fichiers dans /public/realisations)
   const realisations = [
     { type: 'image', src: '/realisations/projet1.jpg', title: 'Rénovation électrique - Paris' },
     { type: 'image', src: '/realisations/projet2.jpg', title: 'Installation domotique - Lyon' },
@@ -12,7 +12,7 @@ export default function Home() {
 
   return (
     <div className="bg-gray-50">
-      {/* Bannière promotionnelle (fermable optionnel) */}
+      {/* Bannière promotionnelle */}
       <div className="bg-yellow-500 text-gray-900 py-3 text-center font-semibold">
         <div className="container mx-auto px-4">
           🚨 PROMO D'ÉTÉ : -20% sur tous les outils jusqu'au 30 avril ! 
@@ -113,6 +113,9 @@ export default function Home() {
           <Carousel items={realisations} autoplay delay={4000} />
         </div>
       </section>
+
+      {/* Section Derniers articles */}
+      <ClientLatestProducts />
 
       {/* Call to action */}
       <section className="bg-gray-200 py-16 text-center">
