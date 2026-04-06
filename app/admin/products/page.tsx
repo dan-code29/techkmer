@@ -12,6 +12,7 @@ type Product = {
   category: string;
   salesCount: number;
   description: string;
+  isPromotion: number;
 };
 
 export default function AdminProductsPage() {
@@ -24,12 +25,14 @@ export default function AdminProductsPage() {
       const res = await fetch('/api/admin/products');
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ error: 'Erreur inconnue' }));
+        console.error(`❌ HTTP ${res.status}:`, errorData);
         throw new Error(errorData.error || `HTTP ${res.status}`);
       }
       const data = await res.json();
+      console.log('✅ Produits chargés:', data);
       setProducts(data);
     } catch (err: any) {
-      console.error('Erreur fetch:', err);
+      console.error('❌ Erreur fetch complète:', err);
       setError(err.message || 'Impossible de charger les produits');
     } finally {
       setLoading(false);

@@ -13,6 +13,8 @@ type Product = {
   category: string;
   description: string;
   dateAdded: string;
+  salesCount: number;
+  isPromotion: number;
 };
 
 const ITEMS_PER_PAGE = 5;

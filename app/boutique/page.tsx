@@ -13,6 +13,8 @@ type Product = {
   category: string;
   salesCount: number;
   description: string;
+  isPromotion: number;
+  dateAdded?: string;
 };
 
 export default function BoutiquePage() {

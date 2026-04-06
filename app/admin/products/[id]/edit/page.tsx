@@ -46,13 +46,16 @@ export default function EditProductPage() {
         console.log('🔍 isPromotion valeur brute:', product.isPromotion, 'type:', typeof product.isPromotion);
 
         if (isMounted) {
+          // Convertir isPromotion correctement (peut être 0, 1, '0', '1', true, false)
+          const isPromoValue = Boolean(Number(product.isPromotion));
+          console.log('🔍 Conversion isPromotion:', `${product.isPromotion} (${typeof product.isPromotion})`, '→', isPromoValue);
           setForm({
             name: product.name || '',
             price: product.price?.toString() || '',
             category: product.category || '',
             salesCount: product.salesCount?.toString() || '',
             description: product.description || '',
-            isPromotion: product.isPromotion === 1,
+            isPromotion: isPromoValue,
           });
           setCurrentImage(product.image || '');
           setCategories(Array.isArray(cats) ? cats : []);
@@ -77,7 +80,13 @@ export default function EditProductPage() {
   };
 
   const handlePromotionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, isPromotion: e.target.checked }));
+    const checked = e.target.checked;
+    console.log('✅ Checkbox cliquée, nouvelle valeur:', checked);
+    setForm(prev => {
+      const updated = { ...prev, isPromotion: checked };
+      console.log('📝 Form state mis à jour:', updated);
+      return updated;
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,6 +157,7 @@ export default function EditProductPage() {
       isPromotion: form.isPromotion,
     };
     console.log('📤 Payload envoyé à PUT:', payload);
+    console.log('✅ isPromotion (boolean):', form.isPromotion, 'sera converti en:', form.isPromotion ? 1 : 0);
 
     try {
       const res = await fetch(`/api/admin/products/${id}`, {

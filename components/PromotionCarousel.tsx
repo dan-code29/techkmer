@@ -23,8 +23,14 @@ export default function PromotionCarousel() {
     fetch('/api/products')
       .then(res => res.json())
       .then(data => {
+        console.log('📥 Tous les produits reçus:', data);
         // Filtrer les produits en promotion (isPromotion === 1)
-        const promoProducts = data.filter((p: Product) => p.isPromotion === 1);
+        const promoProducts = data.filter((p: Product) => {
+          const isPromo = p.isPromotion === 1;
+          console.log(`   Produit ${p.id} (${p.name}): isPromotion=${p.isPromotion} (type: ${typeof p.isPromotion}) -> filtré=${isPromo}`);
+          return isPromo;
+        });
+        console.log(`✅ ${promoProducts.length} produits en promotion trouvés sur ${data.length} total`);
         setProducts(promoProducts);
         setLoading(false);
       })

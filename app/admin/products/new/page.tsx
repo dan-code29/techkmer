@@ -57,7 +57,13 @@ export default function NewProductPage() {
   };
 
   const handlePromotionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, isPromotion: e.target.checked }));
+    const checked = e.target.checked;
+    console.log('✅ Checkbox cliquée, nouvelle valeur:', checked);
+    setForm(prev => {
+      const updated = { ...prev, isPromotion: checked };
+      console.log('📝 Form state mis à jour:', updated);
+      return updated;
+    });
   };
 
   // Gestion de la sélection d'image
@@ -157,7 +163,18 @@ export default function NewProductPage() {
           isPromotion: form.isPromotion,
         }),
       });
-      const productData = await productRes.json();
+      const productRes2 = productRes; // Utile pour le logging
+      console.log('📤 Payload POST envoyé:', {
+        name: form.name.trim(),
+        price: priceValue,
+        image: imagePath,
+        category: form.category.trim(),
+        salesCount: parseInt(form.salesCount) || 0,
+        description: form.description.trim(),
+        isPromotion: form.isPromotion,
+      });
+      console.log('✅ isPromotion (boolean):', form.isPromotion, 'sera converti en:', form.isPromotion ? 1 : 0);
+      const productData = await productRes2.json();
       if (!productRes.ok) {
         throw new Error(productData.error || 'Erreur lors de la création du produit');
       }

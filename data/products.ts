@@ -8,6 +8,7 @@ export type Product = {
   salesCount: number;
   dateAdded: string;
   description: string;   // <-- champ ajouté
+  isPromotion: number;   // <-- 0 ou 1
 };
 
 export const products: Product[] = [

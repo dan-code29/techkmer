@@ -49,17 +49,21 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, price, image, category, salesCount, description } = body;
+    const { name, price, image, category, salesCount, description, isPromotion } = body;
 
     if (!name || !price || !image || !category) {
       return NextResponse.json({ error: 'Champs manquants' }, { status: 400 });
     }
 
+    // Convertir isPromotion correctement (peut être boolean true/false ou 1/0)
+    const isPromotionValue = isPromotion ? 1 : 0;
+    console.log('📥 API PUT reçu isPromotion:', isPromotion, '(type:', typeof isPromotion, ') -> convertir en:', isPromotionValue);
+
     const result = await turso.execute({
       sql: `UPDATE products
-            SET name = ?, price = ?, image = ?, category = ?, salesCount = ?, description = ?
+            SET name = ?, price = ?, image = ?, category = ?, salesCount = ?, description = ?, isPromotion = ?
             WHERE id = ? RETURNING *`,
-      args: [name, price, image, category, salesCount || 0, description || null, productId],
+      args: [name, price, image, category, salesCount || 0, description || null, isPromotionValue, productId],
     });
 
     if (result.rows.length === 0) {
