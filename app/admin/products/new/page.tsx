@@ -14,6 +14,7 @@ export default function NewProductPage() {
     category: '',
     salesCount: '',
     description: '',
+    isPromotion: false,
   });
 
   // Liste des catégories existantes
@@ -55,6 +56,10 @@ export default function NewProductPage() {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handlePromotionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm(prev => ({ ...prev, isPromotion: e.target.checked }));
+  };
+
   // Gestion de la sélection d'image
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,7 +71,6 @@ export default function NewProductPage() {
       return;
     }
 
-    // Vérifier le type de fichier
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
       setImageError('Format non supporté. Utilisez JPG, PNG ou WEBP.');
@@ -75,7 +79,6 @@ export default function NewProductPage() {
       return;
     }
 
-    // Vérifier la taille (max 5 Mo)
     if (file.size > 5 * 1024 * 1024) {
       setImageError('L’image ne doit pas dépasser 5 Mo.');
       setImageFile(null);
@@ -106,12 +109,13 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
+    // Validations
     if (!form.name.trim()) {
       setError('Le nom du produit est requis');
       return;
     }
-    if (!form.price || parseFloat(form.price) <= 0) {
+    const priceValue = parseFloat(form.price);
+    if (isNaN(priceValue) || priceValue <= 0) {
       setError('Le prix doit être un nombre positif');
       return;
     }
@@ -132,10 +136,7 @@ export default function NewProductPage() {
       let imagePath = '';
       const uploadForm = new FormData();
       uploadForm.append('image', imageFile);
-      const uploadRes = await fetch('/api/upload', {
-        method: 'POST',
-        body: uploadForm,
-      });
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadForm });
       const uploadData = await uploadRes.json();
       if (!uploadRes.ok) {
         throw new Error(uploadData.error || 'Erreur lors de l’upload de l’image');
@@ -148,11 +149,12 @@ export default function NewProductPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name.trim(),
-          price: parseFloat(form.price),
+          price: priceValue,
           image: imagePath,
           category: form.category.trim(),
           salesCount: parseInt(form.salesCount) || 0,
           description: form.description.trim(),
+          isPromotion: form.isPromotion,
         }),
       });
       const productData = await productRes.json();
@@ -160,7 +162,6 @@ export default function NewProductPage() {
         throw new Error(productData.error || 'Erreur lors de la création du produit');
       }
 
-      // Succès : redirection vers la liste des produits
       router.push('/admin/products');
     } catch (err: any) {
       console.error(err);
@@ -170,7 +171,7 @@ export default function NewProductPage() {
     }
   };
 
-  // Nettoyer l'aperçu de l'image lors du démontage du composant
+  // Nettoyer l'aperçu
   useEffect(() => {
     return () => {
       if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -308,6 +309,19 @@ export default function NewProductPage() {
             className="w-full border rounded p-2"
             placeholder="Description détaillée du produit..."
           />
+        </div>
+
+        {/* Checkbox promotion */}
+        <div>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={form.isPromotion}
+              onChange={handlePromotionChange}
+              className="w-4 h-4"
+            />
+            <span className="font-medium">Mettre ce produit en promotion (apparaîtra dans le carrousel)</span>
+          </label>
         </div>
 
         {/* Message d'erreur global */}

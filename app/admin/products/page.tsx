@@ -80,7 +80,9 @@ export default function AdminProductsPage() {
               <th className="p-2 border">Catégorie</th>
               <th className="p-2 border">Prix</th>
               <th className="p-2 border">Ventes</th>
+              <th className="p-2 border">Promo</th>
               <th className="p-2 border">Actions</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -107,6 +109,8 @@ export default function AdminProductsPage() {
                 <td className="p-2">{product.category}</td>
                 <td className="p-2">{formatPrice(product.price)}</td>
                 <td className="p-2 text-center">{product.salesCount}</td>
+                <td className="p-2 text-center">
+                    {product.isPromotion === 1 ? '✅' : '❌'}</td>
                 <td className="p-2 text-center space-x-2">
                   <Link href={`/admin/products/${product.id}/edit`} className="text-blue-600 hover:underline">
                     Modifier
@@ -114,6 +118,7 @@ export default function AdminProductsPage() {
                   <button onClick={() => deleteProduct(product.id)} className="text-red-600 hover:underline ml-2">
                     Supprimer
                   </button>
+                  
                 </td>
               </tr>
             ))}

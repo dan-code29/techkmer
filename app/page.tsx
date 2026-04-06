@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Carousel from '@/components/Carousel';
-import ClientLatestProducts from '@/components/ClientLatestProducts';
+import LatestProducts from '@/components/LatestProducts';
+import PromotionCarousel from '@/components/PromotionCarousel'; // <-- import
 
 export default function Home() {
   const realisations = [
@@ -22,11 +23,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Section Héros avec image de fond */}
+      {/* Section Héros */}
       <div className="relative bg-blue-600 text-white">
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            src="/images/backgr.png"
             alt="Atelier technique"
             fill
             className="object-cover opacity-20"
@@ -50,6 +51,9 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Carrousel des produits en promotion */}
+      <PromotionCarousel />
+
       {/* Section Services */}
       <section className="py-16 container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Nos services</h2>
@@ -58,23 +62,30 @@ export default function Home() {
             {
               title: "Vente d'équipements",
               desc: "Matériel informatique, sécurité électronique, électricité, domotique. Marques de qualité.",
-              img: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3785?w=800&auto=format",
-              alt: "Matériel"
+              img: "/images/services/vente.png",
+              alt: "Vente d'équipements",
+              link: "/boutique"
             },
             {
               title: "Installation & mise en service",
               desc: "Installation de vos équipements par nos techniciens experts.",
-              img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format",
-              alt: "Installation"
+              img: "/images/services/installationss.png",
+              alt: "Installation",
+              link: "/installation"
             },
             {
               title: "Maintenance & dépannage",
               desc: "Intervention rapide pour particuliers et entreprises. Dépannage électrique, domotique, informatique.",
-              img: "https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?w=800&auto=format",
-              alt: "Maintenance"
+              img: "/images/services/maintenance.png",
+              alt: "Maintenance",
+              link: "/maintenance"
             }
           ].map((service) => (
-            <div key={service.title} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+            <Link
+              key={service.title}
+              href={service.link}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 transform hover:-translate-y-1 block"
+            >
               <div className="relative h-48">
                 <Image src={service.img} alt={service.alt} fill className="object-cover" />
               </div>
@@ -82,7 +93,7 @@ export default function Home() {
                 <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
                 <p className="text-gray-600">{service.desc}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -106,7 +117,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section Nos réalisations avec carrousel */}
+      {/* Section Nos réalisations */}
       <section className="py-16 bg-gray-100">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8">Nos réalisations</h2>
@@ -115,7 +126,7 @@ export default function Home() {
       </section>
 
       {/* Section Derniers articles */}
-      <ClientLatestProducts />
+      <LatestProducts />
 
       {/* Call to action */}
       <section className="bg-gray-200 py-16 text-center">
