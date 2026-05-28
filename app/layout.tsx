@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Techkmer",
-  description: "Services techniques, achat d'outils, installation, devis",
+  title: "Smart Redos Tech - Connecter, éclairer, protéger",
+  description: "Solutions techniques complètes : électricité, informatique, sécurité électronique. Installation, maintenance et conseils par des experts qualifiés.",
 };
 
 export default function RootLayout({

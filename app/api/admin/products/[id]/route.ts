@@ -49,9 +49,9 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, price, image, category, salesCount, description, isPromotion } = body;
+    const { name, price, image, images, promoPrice, category, salesCount, description, isPromotion } = body;
 
-    if (!name || !price || !image || !category) {
+    if (!name || !price || !category) {
       return NextResponse.json({ error: 'Champs manquants' }, { status: 400 });
     }
 
@@ -59,12 +59,41 @@ export async function PUT(
     const isPromotionValue = isPromotion ? 1 : 0;
     console.log('📥 API PUT reçu isPromotion:', isPromotion, '(type:', typeof isPromotion, ') -> convertir en:', isPromotionValue);
 
-    const result = await turso.execute({
-      sql: `UPDATE products
-            SET name = ?, price = ?, image = ?, category = ?, salesCount = ?, description = ?, isPromotion = ?
-            WHERE id = ? RETURNING *`,
-      args: [name, price, image, category, salesCount || 0, description || null, isPromotionValue, productId],
-    });
+    // vérifier et ajouter colonnes si nécessaire
+    try {
+      const info = await turso.execute('PRAGMA table_info(products)');
+      const cols = (info.rows || []).map((r: any) => r.name);
+      if (!cols.includes('images')) {
+        await turso.execute({ sql: 'ALTER TABLE products ADD COLUMN images TEXT' });
+      }
+      if (!cols.includes('promoPrice')) {
+        await turso.execute({ sql: 'ALTER TABLE products ADD COLUMN promoPrice REAL' });
+      }
+    } catch (err) {
+      console.warn('⚠️ Impossible de vérifier/ajouter colonnes (ignoré):', err);
+    }
+
+    const imagesJson = images ? JSON.stringify(images) : null;
+    const imageToStore = image || (Array.isArray(images) && images.length > 0 ? images[0] : null);
+    const promoPriceValue = promoPrice != null ? promoPrice : null;
+
+    // Construire la requête UPDATE dynamiquement
+    const sets = ['name = ?', 'price = ?', 'image = ?', 'category = ?', 'salesCount = ?', 'description = ?', 'isPromotion = ?'];
+    const args: any[] = [name, price, imageToStore, category, salesCount || 0, description || null, isPromotionValue];
+
+    if (imagesJson !== null) {
+      sets.push('images = ?');
+      args.push(imagesJson);
+    }
+    if (promoPriceValue !== null) {
+      sets.push('promoPrice = ?');
+      args.push(promoPriceValue);
+    }
+
+    args.push(productId);
+
+    const sql = `UPDATE products SET ${sets.join(', ')} WHERE id = ? RETURNING *`;
+    const result = await turso.execute({ sql, args });
 
     if (result.rows.length === 0) {
       return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });

@@ -16,6 +16,7 @@ export default function EditProductPage() {
     salesCount: '',
     description: '',
     isPromotion: false,
+    promoPrice: '',
   });
 
   const [categories, setCategories] = useState<string[]>([]);
@@ -24,9 +25,9 @@ export default function EditProductPage() {
   const [error, setError] = useState('');
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState('');
-  const [currentImage, setCurrentImage] = useState('');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [currentImages, setCurrentImages] = useState<string[]>([]);
   const [imageError, setImageError] = useState('');
 
   // Charger le produit et les catégories
@@ -56,8 +57,21 @@ export default function EditProductPage() {
             salesCount: product.salesCount?.toString() || '',
             description: product.description || '',
             isPromotion: isPromoValue,
+            promoPrice: product.promoPrice ? String(product.promoPrice) : '',
           });
-          setCurrentImage(product.image || '');
+          // gérer images existantes : soit product.images (JSON), soit product.image unique
+          try {
+            const imgs = product.images ? (typeof product.images === 'string' ? JSON.parse(product.images) : product.images) : null;
+            if (Array.isArray(imgs) && imgs.length > 0) {
+              setCurrentImages(imgs);
+            } else if (product.image) {
+              setCurrentImages([product.image]);
+            } else {
+              setCurrentImages([]);
+            }
+          } catch (err) {
+            setCurrentImages(product.image ? [product.image] : []);
+          }
           setCategories(Array.isArray(cats) ? cats : []);
         }
       } catch (err: any) {
@@ -71,8 +85,8 @@ export default function EditProductPage() {
   }, [id]);
 
   useEffect(() => {
-    return () => { if (imagePreview) URL.revokeObjectURL(imagePreview); };
-  }, [imagePreview]);
+    return () => { imagePreviews.forEach(p => URL.revokeObjectURL(p)); };
+  }, [imagePreviews]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -90,20 +104,20 @@ export default function EditProductPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files || []);
     setImageError('');
-    if (!file) { setImageFile(null); setImagePreview(''); return; }
+    if (files.length === 0) { setImageFiles([]); setImagePreviews([]); return; }
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      setImageError('Format non supporté. Utilisez JPG, PNG ou WEBP.');
-      setImageFile(null); setImagePreview(''); return;
+    const validFiles: File[] = [];
+    const previews: string[] = [];
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) { setImageError('Format non supporté. Utilisez JPG, PNG ou WEBP.'); continue; }
+      if (file.size > 5 * 1024 * 1024) { setImageError('Chaque image ne doit pas dépasser 5 Mo.'); continue; }
+      validFiles.push(file);
+      previews.push(URL.createObjectURL(file));
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setImageError('L’image ne doit pas dépasser 5 Mo.');
-      setImageFile(null); setImagePreview(''); return;
-    }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setImageFiles(validFiles);
+    setImagePreviews(previews);
   };
 
   const handleAddNewCategory = () => {
@@ -131,15 +145,21 @@ export default function EditProductPage() {
     setSaving(true);
     setError('');
 
-    let imagePath = currentImage;
-    if (imageFile) {
+    let imagePath = currentImages[0] || '';
+    let finalImages = currentImages.slice();
+    if (imageFiles.length > 0) {
       try {
-        const uploadForm = new FormData();
-        uploadForm.append('image', imageFile);
-        const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadForm });
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok) throw new Error(uploadData.error || 'Erreur upload');
-        imagePath = uploadData.path;
+        const uploadPromises = imageFiles.map(async (file) => {
+          const uploadForm = new FormData();
+          uploadForm.append('image', file);
+          const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadForm });
+          const uploadData = await uploadRes.json();
+          if (!uploadRes.ok) throw new Error(uploadData.error || 'Erreur upload');
+          return uploadData.path;
+        });
+        const paths = await Promise.all(uploadPromises);
+        finalImages = paths;
+        imagePath = finalImages[0] || imagePath;
       } catch (err: any) {
         setError(err.message);
         setSaving(false);
@@ -151,6 +171,8 @@ export default function EditProductPage() {
       name: form.name.trim(),
       price: priceValue,
       image: imagePath,
+      images: finalImages,
+      promoPrice: form.promoPrice ? parseFloat(form.promoPrice) : null,
       category: form.category.trim(),
       salesCount: parseInt(form.salesCount) || 0,
       description: form.description.trim(),
@@ -185,16 +207,27 @@ export default function EditProductPage() {
       <h1 className="text-2xl font-bold mb-6">Modifier le produit</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block font-medium mb-1">Image actuelle</label>
-          {currentImage && (
-            <div className="mb-2">
-              <Image src={currentImage} alt="produit" width={100} height={100} className="object-cover rounded border" />
+          <label className="block font-medium mb-1">Images actuelles</label>
+          {currentImages.length > 0 ? (
+            <div className="mb-2 flex gap-2 flex-wrap">
+              {currentImages.map((img, idx) => (
+                <Image key={idx} src={img} alt={`produit-${idx}`} width={100} height={100} className="object-cover rounded border" />
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">Aucune image</p>
+          )}
+
+          <label className="block font-medium mt-2">Remplacer les images / ajouter (optionnel)</label>
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} multiple className="w-full border rounded p-2" />
+          {imageError && <p className="text-red-500 text-sm mt-1">{imageError}</p>}
+          {imagePreviews.length > 0 && (
+            <div className="mt-2 flex gap-2 flex-wrap">
+              {imagePreviews.map((p, idx) => (
+                <img key={idx} src={p} alt={`Aperçu ${idx + 1}`} className="w-24 h-24 object-cover rounded border" />
+              ))}
             </div>
           )}
-          <label className="block font-medium mt-2">Remplacer l’image (optionnel)</label>
-          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} className="w-full border rounded p-2" />
-          {imageError && <p className="text-red-500 text-sm mt-1">{imageError}</p>}
-          {imagePreview && <img src={imagePreview} alt="Aperçu" className="mt-2 w-32 h-32 object-cover rounded border" />}
         </div>
 
         <div>
@@ -205,6 +238,11 @@ export default function EditProductPage() {
         <div>
           <label className="block font-medium mb-1">Prix (FCFA) *</label>
           <input type="number" step="0.01" name="price" value={form.price} onChange={handleChange} required className="w-full border rounded p-2" />
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">Prix promotionnel (FCFA)</label>
+          <input type="number" step="0.01" name="promoPrice" value={form.promoPrice} onChange={handleChange} className="w-full border rounded p-2" />
         </div>
 
         <div>

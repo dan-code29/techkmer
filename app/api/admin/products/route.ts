@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, price, image, category, salesCount, description, isPromotion } = body;
+    const { name, price, image, images, promoPrice, category, salesCount, description, isPromotion } = body;
 
     if (!name || !price || !image || !category) {
       return NextResponse.json({ error: 'Champs manquants (name, price, image, category)' }, { status: 400 });
@@ -36,12 +36,44 @@ export async function POST(request: NextRequest) {
     const isPromotionValue = isPromotion ? 1 : 0;
     console.log('📥 API POST reçu isPromotion:', isPromotion, '(type:', typeof isPromotion, ') -> convertir en:', isPromotionValue);
 
+    // vérifier si les colonnes 'images' et 'promoPrice' existent, sinon les ajouter
+    try {
+      const info = await turso.execute('PRAGMA table_info(products)');
+      const cols = (info.rows || []).map((r: any) => r.name);
+      if (!cols.includes('images')) {
+        await turso.execute({ sql: 'ALTER TABLE products ADD COLUMN images TEXT' });
+      }
+      if (!cols.includes('promoPrice')) {
+        await turso.execute({ sql: 'ALTER TABLE products ADD COLUMN promoPrice REAL' });
+      }
+    } catch (err) {
+      console.warn('⚠️ Impossible de vérifier/ajouter colonnes (ignoré):', err);
+    }
+
     const dateAdded = new Date().toISOString().slice(0, 10);
-    const result = await turso.execute({
-      sql: `INSERT INTO products (name, price, image, category, salesCount, dateAdded, description, isPromotion)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
-      args: [name, price, image, category, salesCount || 0, dateAdded, description || null, isPromotionValue],
-    });
+
+    const imagesJson = images ? JSON.stringify(images) : null;
+    const imageToStore = image || (Array.isArray(images) && images.length > 0 ? images[0] : null);
+    const promoPriceValue = promoPrice != null ? promoPrice : null;
+
+    // Construire la requête dynamiquement pour rester compatible
+    const cols = ['name', 'price', 'image', 'category', 'salesCount', 'dateAdded', 'description', 'isPromotion'];
+    const placeholders = ['?', '?', '?', '?', '?', '?', '?', '?'];
+    const args: any[] = [name, price, imageToStore, category, salesCount || 0, dateAdded, description || null, isPromotionValue];
+
+    if (imagesJson !== null) {
+      cols.push('images');
+      placeholders.push('?');
+      args.push(imagesJson);
+    }
+    if (promoPriceValue !== null) {
+      cols.push('promoPrice');
+      placeholders.push('?');
+      args.push(promoPriceValue);
+    }
+
+    const sql = `INSERT INTO products (${cols.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING *`;
+    const result = await turso.execute({ sql, args });
 
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {

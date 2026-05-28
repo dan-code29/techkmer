@@ -13,6 +13,7 @@ type Product = {
   salesCount: number;
   description: string;
   isPromotion: number;
+  promoPrice?: number | null;
 };
 
 export default function AdminProductsPage() {
@@ -76,12 +77,13 @@ export default function AdminProductsPage() {
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border">
           <thead>
-            <tr className="bg-gray-200">
+              <tr className="bg-gray-200">
               <th className="p-2 border">ID</th>
               <th className="p-2 border">Image</th>
               <th className="p-2 border">Nom</th>
               <th className="p-2 border">Catégorie</th>
               <th className="p-2 border">Prix</th>
+              <th className="p-2 border">Prix promo</th>
               <th className="p-2 border">Ventes</th>
               <th className="p-2 border">Promo</th>
               <th className="p-2 border">Actions</th>
@@ -111,6 +113,7 @@ export default function AdminProductsPage() {
                 <td className="p-2">{product.name}</td>
                 <td className="p-2">{product.category}</td>
                 <td className="p-2">{formatPrice(product.price)}</td>
+                <td className="p-2">{product.promoPrice != null ? formatPrice(product.promoPrice) : '-'}</td>
                 <td className="p-2 text-center">{product.salesCount}</td>
                 <td className="p-2 text-center">
                     {product.isPromotion === 1 ? '✅' : '❌'}</td>

@@ -15,15 +15,16 @@ export default function NewProductPage() {
     salesCount: '',
     description: '',
     isPromotion: false,
+    promoPrice: '',
   });
 
   // Liste des catégories existantes
   const [categories, setCategories] = useState<string[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
-  // Gestion de l'image
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  // Gestion des images (plusieurs)
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [imageError, setImageError] = useState('');
 
   // États généraux
@@ -68,32 +69,33 @@ export default function NewProductPage() {
 
   // Gestion de la sélection d'image
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files || []);
     setImageError('');
-
-    if (!file) {
-      setImageFile(null);
-      setImagePreview('');
+    if (files.length === 0) {
+      setImageFiles([]);
+      setImagePreviews([]);
       return;
     }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      setImageError('Format non supporté. Utilisez JPG, PNG ou WEBP.');
-      setImageFile(null);
-      setImagePreview('');
-      return;
+    const validFiles: File[] = [];
+    const previews: string[] = [];
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        setImageError('Format non supporté. Utilisez JPG, PNG ou WEBP.');
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError('Chaque image ne doit pas dépasser 5 Mo.');
+        continue;
+      }
+      validFiles.push(file);
+      previews.push(URL.createObjectURL(file));
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setImageError('L’image ne doit pas dépasser 5 Mo.');
-      setImageFile(null);
-      setImagePreview('');
-      return;
-    }
-
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setImageFiles(validFiles);
+    setImagePreviews(previews);
   };
 
   // Ajout d'une nouvelle catégorie à la liste
@@ -129,8 +131,8 @@ export default function NewProductPage() {
       setError('Veuillez sélectionner ou ajouter une catégorie');
       return;
     }
-    if (!imageFile) {
-      setError('Veuillez sélectionner une image');
+    if (imageFiles.length === 0) {
+      setError('Veuillez sélectionner au moins une image');
       return;
     }
 
@@ -138,16 +140,24 @@ export default function NewProductPage() {
     setError('');
 
     try {
-      // 1. Upload de l'image
+      // 1. Upload des images (plusieurs)
       let imagePath = '';
-      const uploadForm = new FormData();
-      uploadForm.append('image', imageFile);
-      const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadForm });
-      const uploadData = await uploadRes.json();
-      if (!uploadRes.ok) {
-        throw new Error(uploadData.error || 'Erreur lors de l’upload de l’image');
+      const uploadedPaths: string[] = [];
+      if (imageFiles.length > 0) {
+        const uploadPromises = imageFiles.map(async (file) => {
+          const uploadForm = new FormData();
+          uploadForm.append('image', file);
+          const uploadRes = await fetch('/api/upload', { method: 'POST', body: uploadForm });
+          const uploadData = await uploadRes.json();
+          if (!uploadRes.ok) {
+            throw new Error(uploadData.error || 'Erreur lors de l’upload de l’image');
+          }
+          return uploadData.path;
+        });
+        const paths = await Promise.all(uploadPromises);
+        uploadedPaths.push(...paths);
+        imagePath = uploadedPaths[0] || '';
       }
-      imagePath = uploadData.path;
 
       // 2. Création du produit
       const productRes = await fetch('/api/admin/products', {
@@ -157,6 +167,8 @@ export default function NewProductPage() {
           name: form.name.trim(),
           price: priceValue,
           image: imagePath,
+          images: uploadedPaths,
+          promoPrice: form.promoPrice ? parseFloat(form.promoPrice) : null,
           category: form.category.trim(),
           salesCount: parseInt(form.salesCount) || 0,
           description: form.description.trim(),
@@ -168,6 +180,8 @@ export default function NewProductPage() {
         name: form.name.trim(),
         price: priceValue,
         image: imagePath,
+        images: uploadedPaths,
+        promoPrice: form.promoPrice ? parseFloat(form.promoPrice) : null,
         category: form.category.trim(),
         salesCount: parseInt(form.salesCount) || 0,
         description: form.description.trim(),
@@ -191,9 +205,9 @@ export default function NewProductPage() {
   // Nettoyer l'aperçu
   useEffect(() => {
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      imagePreviews.forEach((p: string) => URL.revokeObjectURL(p));
     };
-  }, [imagePreview]);
+  }, [imagePreviews]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -207,13 +221,15 @@ export default function NewProductPage() {
             type="file"
             accept="image/jpeg,image/png,image/webp"
             onChange={handleImageChange}
-            required
+            multiple
             className="w-full border rounded p-2"
           />
           {imageError && <p className="text-red-500 text-sm mt-1">{imageError}</p>}
-          {imagePreview && (
-            <div className="mt-2">
-              <img src={imagePreview} alt="Aperçu" className="w-32 h-32 object-cover rounded border" />
+          {imagePreviews.length > 0 && (
+            <div className="mt-2 flex gap-2 flex-wrap">
+              {imagePreviews.map((p, idx) => (
+                <img key={idx} src={p} alt={`Aperçu ${idx + 1}`} className="w-24 h-24 object-cover rounded border" />
+              ))}
             </div>
           )}
         </div>
@@ -242,6 +258,20 @@ export default function NewProductPage() {
             value={form.price}
             onChange={handleChange}
             required
+            className="w-full border rounded p-2"
+            placeholder="0.00"
+          />
+        </div>
+
+        {/* Prix promotionnel (optionnel) */}
+        <div>
+          <label className="block font-medium mb-1">Prix promotionnel (FCFA)</label>
+          <input
+            type="number"
+            step="0.01"
+            name="promoPrice"
+            value={form.promoPrice}
+            onChange={handleChange}
             className="w-full border rounded p-2"
             placeholder="0.00"
           />

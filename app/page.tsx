@@ -5,10 +5,16 @@ import LatestProducts from '@/components/LatestProducts';
 import PromotionCarousel from '@/components/PromotionCarousel'; // <-- import
 
 export default function Home() {
-  const realisations = [
+  const realisations: { type: 'image' | 'video'; src: string; title: string }[] = [
     { type: 'image', src: '/realisations/projet1.jpg', title: 'Rénovation électrique - Paris' },
     { type: 'image', src: '/realisations/projet2.jpg', title: 'Installation domotique - Lyon' },
     { type: 'video', src: '/realisations/video-demo.mp4', title: 'Démonstration installation' },
+  ];
+
+  const heroSlides = [
+    { type: 'image', src: '/images/background tech.png', title: 'Installation électrique de qualité' },
+    { type: 'image', src: '/images/background3.png', title: 'Solutions domotiques professionnelles' },
+    { type: 'image', src: '/images/background2.png', title: 'Maintenance rapide et fiable' },
   ];
 
   return (
@@ -24,23 +30,17 @@ export default function Home() {
       </div>
 
       {/* Section Héros */}
-      <div className="relative bg-blue-600 text-white">
+      <div className="relative overflow-hidden bg-blue-900 text-white">
         <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/backgr.png"
-            alt="Atelier technique"
-            fill
-            className="object-cover opacity-20"
-            priority
-          />
+          <Carousel items={heroSlides} autoplay delay={8500} showNavigation={false} showPagination={false} />
         </div>
-        <div className="relative z-10 container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">Techkmer</h1>
-          <p className="text-xl md:text-2xl mb-6 max-w-3xl mx-auto">
-            Votre partenaire de confiance pour vos équipements électriques, informatiques et de sécurité électronique.
+        <div className="relative z-10 container mx-auto px-16 py-26 text-right">
+          <p className="text-lg md:text-xl mb-4 font-semibold max-w-3xl mx-auto">
+            <span className="block">Une énergie sous contrôle,</span>
+            <span className="block mt-2 text-base md:text-lg">une maison qui vous obéit.</span>
           </p>
-          <p className="text-lg mb-8 max-w-2xl mx-auto">
-            De la vente à l'installation, jusqu'à la maintenance de vos équipements, nous vous accompagnons à chaque étape.
+          <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto font-medium">
+            Simple. Sûr. Connecté
           </p>
           <Link
             href="/devis"

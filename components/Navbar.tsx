@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/context/CartContext';
@@ -25,8 +26,19 @@ export default function Navbar() {
     <nav className="bg-blue-600 text-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="text-xl font-bold">
-          Techkmer
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-10 h-10 bg-gradient-to-r from-white to-cyan-500 rounded-full flex items-center justify-center font-bold text-white">
+            
+            <Image
+                        src="/images/logo.png"
+                        alt="Logo Tech Innov'Solutions"
+                        width={4000}
+                        height={4000}
+                        className="object-contain"
+                    />
+          </div>
+
+          <span className="text-lg font-bold hidden sm:inline">Tech Innov'Solutions</span>
         </Link>
 
         {/* Bouton hamburger (mobile) */}

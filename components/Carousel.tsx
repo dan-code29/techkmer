@@ -20,9 +20,17 @@ interface CarouselProps {
   items: CarouselItem[];
   autoplay?: boolean;
   delay?: number;
+  showNavigation?: boolean;
+  showPagination?: boolean;
 }
 
-export default function Carousel({ items, autoplay = true, delay = 3000 }: CarouselProps) {
+export default function Carousel({
+  items,
+  autoplay = true,
+  delay = 3000,
+  showNavigation = true,
+  showPagination = true,
+}: CarouselProps) {
   return (
     <div className="relative w-full h-96 md:h-[500px]">
       <Swiper
@@ -30,8 +38,8 @@ export default function Carousel({ items, autoplay = true, delay = 3000 }: Carou
         spaceBetween={0}
         slidesPerView={1}
         autoplay={autoplay ? { delay, disableOnInteraction: false } : false}
-        pagination={{ clickable: true }}
-        navigation
+        pagination={showPagination ? { clickable: true } : false}
+        navigation={showNavigation}
         loop
         className="w-full h-full"
       >
