@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
     }
 
     const order = result.rows[0];
-    const orderId = order.id;
+    const orderId = Number(order.id);
+    const totalPriceNum = Number(totalPrice);
 
     // Log
     console.log('✅ Commande créée:', {
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     // Envoyer email de confirmation au client
     try {
-      await sendOrderConfirmationEmail(name, email, orderId, items, totalPrice, deliveryDate, paymentMethod);
+      await sendOrderConfirmationEmail(name, email, orderId, items, totalPriceNum, deliveryDate, paymentMethod);
     } catch (err) {
       console.error('❌ Erreur envoi email client:', err);
       // Ne pas bloquer la réponse si l'email échoue
@@ -81,14 +82,14 @@ export async function POST(request: NextRequest) {
 
     // Envoyer notification à l'admin
     try {
-      await sendOrderNotificationToAdmin(name, phone, address, orderId, totalPrice, paymentMethod);
+      await sendOrderNotificationToAdmin(name, phone, address, orderId, totalPriceNum, paymentMethod);
     } catch (err) {
       console.error('❌ Erreur envoi email admin:', err);
     }
 
     // Envoyer SMS de confirmation
     try {
-      await sendOrderSMS(phone, orderId, deliveryDate);
+      await sendOrderSMS(String(phone), orderId, deliveryDate);
     } catch (err) {
       console.error('❌ Erreur envoi SMS:', err);
     }

@@ -1,13 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import Carousel from '@/components/Carousel'; // Assurez-vous que le composant existe
+import Carousel from '@/components/Carousel';
 
 export default function InstallationPage() {
   const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+237 697654023';
   const whatsappLink = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
-  const telegramLink = 'https://t.me/Dan_Cheff'; // à adapter
+  const telegramLink = 'https://t.me/Dan_Cheff';
 
-  // Liste des services d'installation
   const services = [
     {
       title: 'Installation électrique',
@@ -31,8 +30,8 @@ export default function InstallationPage() {
     },
   ];
 
-  // Exemples de réalisations (remplacez par vos propres images/vidéos)
-  const realisations = [
+  // Correction : typage explicite pour éviter le problème de "readonly"
+  const realisations: { type: 'image' | 'video'; src: string; title: string }[] = [
     { type: 'image', src: '/realisations/installation1.jpg', title: 'Installation domotique - Maison connectée' },
     { type: 'image', src: '/realisations/installation2.jpg', title: 'Mise en place d’un tableau électrique' },
     { type: 'video', src: '/realisations/video-installation.mp4', title: 'Démonstration installation sécurité' },
@@ -48,26 +47,13 @@ export default function InstallationPage() {
 
       {/* Boutons de contact direct */}
       <div className="flex flex-wrap justify-center gap-4 mb-12">
-        <a
-          href={`tel:${phone}`}
-          className="bg-green-600 text-white px-6 py-3 rounded-lg text-center hover:bg-green-700 transition"
-        >
+        <a href={`tel:${phone}`} className="bg-green-600 text-white px-6 py-3 rounded-lg text-center hover:bg-green-700 transition">
           📞 Appeler
         </a>
-        <a
-          href={whatsappLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-green-500 text-white px-6 py-3 rounded-lg text-center hover:bg-green-600 transition"
-        >
+        <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="bg-green-500 text-white px-6 py-3 rounded-lg text-center hover:bg-green-600 transition">
           💬 WhatsApp
         </a>
-        <a
-          href={telegramLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg text-center hover:bg-blue-600 transition"
-        >
+        <a href={telegramLink} target="_blank" rel="noopener noreferrer" className="bg-blue-500 text-white px-6 py-3 rounded-lg text-center hover:bg-blue-600 transition">
           ✈️ Telegram
         </a>
       </div>
