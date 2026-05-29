@@ -9,7 +9,7 @@ type Product = {
   id: number;
   name: string;
   price: number;
-  image: string;
+  image: string | null;
   category: string;
   isPromotion: number;
 };
@@ -23,14 +23,7 @@ export default function PromotionCarousel() {
     fetch('/api/products')
       .then(res => res.json())
       .then(data => {
-        console.log('📥 Tous les produits reçus:', data);
-        // Filtrer les produits en promotion (isPromotion === 1)
-        const promoProducts = data.filter((p: Product) => {
-          const isPromo = p.isPromotion === 1;
-          console.log(`   Produit ${p.id} (${p.name}): isPromotion=${p.isPromotion} (type: ${typeof p.isPromotion}) -> filtré=${isPromo}`);
-          return isPromo;
-        });
-        console.log(`✅ ${promoProducts.length} produits en promotion trouvés sur ${data.length} total`);
+        const promoProducts = data.filter((p: Product) => p.isPromotion === 1);
         setProducts(promoProducts);
         setLoading(false);
       })
@@ -40,7 +33,6 @@ export default function PromotionCarousel() {
       });
   }, []);
 
-  // Autoplay
   useEffect(() => {
     if (products.length === 0) return;
     const interval = setInterval(() => {
@@ -56,6 +48,7 @@ export default function PromotionCarousel() {
   if (products.length === 0) return null;
 
   const current = products[currentIndex];
+  const imageSrc = current.image && typeof current.image === 'string' ? current.image : '/images/placeholder.jpg';
 
   return (
     <div className="relative w-full bg-gradient-to-r from-red-50 to-orange-50 py-12">
@@ -64,7 +57,13 @@ export default function PromotionCarousel() {
         <div className="relative max-w-4xl mx-auto">
           <Link href={`/produit/${current.id}`} className="block">
             <div className="relative h-96 w-full rounded-lg overflow-hidden shadow-lg">
-              <Image src={current.image} alt={current.name} fill className="object-contain bg-white" priority />
+              <Image
+                src={imageSrc}
+                alt={current.name}
+                fill
+                className="object-contain bg-white"
+                priority
+              />
             </div>
           </Link>
           <div className="text-center mt-4">
@@ -75,11 +74,25 @@ export default function PromotionCarousel() {
             <p className="text-2xl text-red-600 font-bold mt-1">{formatPrice(current.price)}</p>
             <span className="inline-block bg-red-500 text-white text-sm px-3 py-1 rounded-full mt-2">Promotion</span>
           </div>
-          <button onClick={goPrev} className="absolute left-0 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70">◀</button>
-          <button onClick={goNext} className="absolute right-0 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70">▶</button>
+          <button
+            onClick={goPrev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70"
+          >
+            ◀
+          </button>
+          <button
+            onClick={goNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70"
+          >
+            ▶
+          </button>
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex space-x-2 mb-4">
             {products.map((_, idx) => (
-              <button key={idx} onClick={() => setCurrentIndex(idx)} className={`w-3 h-3 rounded-full ${idx === currentIndex ? 'bg-blue-600' : 'bg-gray-400'}`} />
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`w-3 h-3 rounded-full ${idx === currentIndex ? 'bg-blue-600' : 'bg-gray-400'}`}
+              />
             ))}
           </div>
         </div>

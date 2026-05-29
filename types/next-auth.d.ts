@@ -1,5 +1,4 @@
-// Type augmentation for NextAuth to include custom `id` and `role` fields
-import { DefaultSession } from "next-auth";
+import { DefaultSession, DefaultUser } from "next-auth";
 
 declare module "next-auth" {
   interface Session {
@@ -7,6 +6,10 @@ declare module "next-auth" {
       id: string;
       role?: string;
     };
+  }
+  // Ajoutez cette ligne pour étendre le type User
+  interface User extends DefaultUser {
+    role?: string;
   }
 }
 

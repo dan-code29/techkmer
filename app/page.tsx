@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Carousel from '@/components/Carousel';
 import LatestProducts from '@/components/LatestProducts';
-import PromotionCarousel from '@/components/PromotionCarousel'; // <-- import
+import PromotionCarousel from '@/components/PromotionCarousel';
 
 export default function Home() {
   const realisations: { type: 'image' | 'video'; src: string; title: string }[] = [
@@ -11,7 +11,8 @@ export default function Home() {
     { type: 'video', src: '/realisations/video-demo.mp4', title: 'Démonstration installation' },
   ];
 
-  const heroSlides = [
+  // Correction : typage explicite pour heroSlides
+  const heroSlides: { type: 'image' | 'video'; src: string; title: string }[] = [
     { type: 'image', src: '/images/background tech.png', title: 'Installation électrique de qualité' },
     { type: 'image', src: '/images/background3.png', title: 'Solutions domotiques professionnelles' },
     { type: 'image', src: '/images/background2.png', title: 'Maintenance rapide et fiable' },
@@ -54,7 +55,7 @@ export default function Home() {
       {/* Carrousel des produits en promotion */}
       <PromotionCarousel />
 
-      {/* Section Services */}
+      {/* Section Services (inchangée) */}
       <section className="py-16 container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-12">Nos services</h2>
         <div className="grid md:grid-cols-3 gap-8">

@@ -31,8 +31,8 @@ export default function MaintenancePage() {
     },
   ];
 
-  // Exemples d'interventions (remplacez par vos propres images/vidéos)
-  const interventions = [
+  // Correction : typage explicite pour éviter l'erreur TypeScript
+  const interventions: { type: 'image' | 'video'; src: string; title: string }[] = [
     { type: 'image', src: '/interventions/depannage1.jpg', title: 'Dépannage électrique - Panne générale' },
     { type: 'image', src: '/interventions/maintenance2.jpg', title: 'Maintenance domotique - Mise à jour' },
     { type: 'video', src: '/interventions/video-intervention.mp4', title: 'Intervention en cours' },

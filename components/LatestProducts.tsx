@@ -9,7 +9,7 @@ type Product = {
   id: number;
   name: string;
   price: number;
-  image: string;
+  image: string | null;
   category: string;
   description: string;
   dateAdded: string;
@@ -40,7 +40,6 @@ export default function LatestProducts() {
       });
   }, []);
 
-  // Trier par dateAdded (du plus récent au plus ancien)
   const sortedProducts = [...products].sort(
     (a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
   );
@@ -54,7 +53,7 @@ export default function LatestProducts() {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.image || '/images/placeholder.jpg',
     });
     setLastProduct(product.name);
     setShowAlert(true);
@@ -73,26 +72,29 @@ export default function LatestProducts() {
         </div>
       )}
       <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
-        {currentProducts.map((product) => (
-          <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 flex flex-col">
-            <Link href={`/produit/${product.id}`} className="relative h-48 block">
-              <Image src={product.image} alt={product.name} fill className="object-cover" />
-            </Link>
-            <div className="p-4 flex flex-col flex-grow">
-              <Link href={`/produit/${product.id}`} className="hover:underline">
-                <h3 className="text-lg font-semibold">{product.name}</h3>
+        {currentProducts.map((product) => {
+          const imageSrc = product.image && typeof product.image === 'string' ? product.image : '/images/placeholder.jpg';
+          return (
+            <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300 flex flex-col">
+              <Link href={`/produit/${product.id}`} className="relative h-48 block">
+                <Image src={imageSrc} alt={product.name} fill className="object-cover" />
               </Link>
-              <p className="text-gray-600 text-sm">{product.category}</p>
-              <p className="text-blue-600 font-bold text-lg mt-2">{formatPrice(product.price)}</p>
-              <button
-                onClick={() => handleAddToCart(product)}
-                className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-              >
-                Ajouter au panier
-              </button>
+              <div className="p-4 flex flex-col flex-grow">
+                <Link href={`/produit/${product.id}`} className="hover:underline">
+                  <h3 className="text-lg font-semibold">{product.name}</h3>
+                </Link>
+                <p className="text-gray-600 text-sm">{product.category}</p>
+                <p className="text-blue-600 font-bold text-lg mt-2">{formatPrice(product.price)}</p>
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                >
+                  Ajouter au panier
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {totalPages > 1 && (
         <div className="flex justify-center mt-8 space-x-2">
