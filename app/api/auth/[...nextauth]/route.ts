@@ -47,7 +47,8 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
-    signUp: '/register',
+    // NextAuth expects `newUser` for post-registration redirect (no `signUp` option)
+    newUser: '/register',
   },
   session: {
     strategy: 'jwt',
