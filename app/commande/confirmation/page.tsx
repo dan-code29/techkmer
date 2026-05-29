@@ -1,8 +1,10 @@
 'use client';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function ConfirmationPage() {
+// Composant interne qui utilise useSearchParams
+function ConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
 
@@ -56,5 +58,14 @@ export default function ConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Composant principal avec Suspense
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-16">Chargement de la confirmation...</div>}>
+      <ConfirmationContent />
+    </Suspense>
   );
 }
