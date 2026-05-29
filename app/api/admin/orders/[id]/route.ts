@@ -3,14 +3,26 @@ import { getToken } from 'next-auth/jwt';
 import { turso } from '@/lib/turso';
 import { sendPaymentConfirmationSMS } from '@/lib/sms';
 
+const verifyAdminAccess = async (request: NextRequest) => {
+  const authHeader = request.headers.get('authorization');
+  const adminPassword = authHeader?.split(' ')[1];
+  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+
+  if (token?.role === 'admin' || adminPassword === process.env.ADMIN_PASSWORD) {
+    return true;
+  }
+
+  return false;
+};
+
 // PATCH : mettre à jour le statut d'une commande
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-    if (token && token.role !== 'admin') {
+    const hasAccess = await verifyAdminAccess(request);
+    if (!hasAccess) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
@@ -36,9 +48,9 @@ export async function PATCH(
     const order = result.rows[0];
 
     // Envoyer SMS de notification si en cours de livraison
-    if (status === 'processing') {
+    if (status === 'processing' && order.phone) {
       try {
-        await sendPaymentConfirmationSMS(order.phone, orderId, order.totalPrice);
+        await sendPaymentConfirmationSMS(String(order.phone), orderId, Number(order.totalPrice));
       } catch (err) {
         console.error('❌ Erreur SMS notification:', err);
       }

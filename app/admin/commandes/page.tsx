@@ -22,35 +22,76 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'processing' | 'delivered'>('all');
+  const [adminPassword, setAdminPassword] = useState<string | null>(null);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (password: string | null) => {
+    if (!password) {
+      setError('Entrez votre mot de passe admin pour voir les commandes.');
+      setLoading(false);
+      setHasAccess(false);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/admin/orders');
-      if (!res.ok) {
-        throw new Error('Impossible de charger les commandes');
-      }
+      const res = await fetch('/api/admin/orders', {
+        headers: { Authorization: `Bearer ${password}` },
+        cache: 'no-store',
+      });
       const data = await res.json();
+      if (!res.ok) {
+        setHasAccess(false);
+        throw new Error(data?.error || 'Impossible de charger les commandes');
+      }
+      if (!Array.isArray(data)) {
+        setHasAccess(false);
+        throw new Error('Réponse inattendue du serveur');
+      }
       setOrders(data);
+      setHasAccess(true);
+      setError('');
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message || 'Impossible de charger les commandes');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleAdminLogin = async (password: string) => {
+    setLoading(true);
+    setError('');
+    setAdminPassword(password);
+    sessionStorage.setItem('adminPassword', password);
+    await fetchOrders(password);
+  };
+
   useEffect(() => {
-    fetchOrders();
+    const savedPassword = sessionStorage.getItem('adminPassword');
+    setAdminPassword(savedPassword);
+    fetchOrders(savedPassword);
   }, []);
 
   const updateOrderStatus = async (orderId: number, newStatus: string) => {
+    if (!adminPassword) {
+      alert('Connectez-vous depuis /admin pour modifier une commande.');
+      return;
+    }
+
     try {
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminPassword}`,
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (!res.ok) throw new Error('Erreur lors de la mise à jour');
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error?.error || 'Erreur lors de la mise à jour');
+      }
       
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
     } catch (err) {
@@ -60,13 +101,23 @@ export default function AdminOrdersPage() {
 
   const deleteOrder = async (orderId: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) return;
+    if (!adminPassword) {
+      alert('Connectez-vous depuis /admin pour supprimer une commande.');
+      return;
+    }
 
     try {
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${adminPassword}`,
+        },
       });
 
-      if (!res.ok) throw new Error('Erreur suppression');
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error?.error || 'Erreur suppression');
+      }
       
       setOrders(orders.filter(o => o.id !== orderId));
     } catch (err) {
@@ -80,12 +131,44 @@ export default function AdminOrdersPage() {
 
   if (loading) return <div className="p-8 text-center">Chargement...</div>;
 
+  if (!hasAccess) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-md">
+        <h1 className="text-3xl font-bold mb-4">Accès administrateur</h1>
+        <p className="mb-4 text-gray-600">Pour voir les commandes clients, entrez votre mot de passe administrateur.</p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAdminLogin(passwordInput);
+          }}
+          className="space-y-4 bg-white rounded shadow p-6"
+        >
+          <input
+            type="password"
+            placeholder="Mot de passe admin"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            className="w-full border rounded p-3"
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white px-4 py-3 rounded hover:bg-blue-700"
+          >
+            Se connecter
+          </button>
+          {error && <p className="text-red-600">{error}</p>}
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestion des commandes</h1>
         <button 
-          onClick={fetchOrders}
+          onClick={() => fetchOrders(adminPassword)}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
           🔄 Actualiser

@@ -18,6 +18,7 @@ export default function CheckoutPage() {
     paymentMethod: 'delivery', // 'delivery' ou 'online'
   });
   const [submitted, setSubmitted] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
 
   // Calculer la date minimum (aujourd'hui + 2 jours)
@@ -27,7 +28,7 @@ export default function CheckoutPage() {
     return date.toISOString().split('T')[0];
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -57,27 +58,44 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Si paiement en ligne, rediriger vers la page de paiement
+    const orderData = {
+      items,
+      totalPrice,
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      address: form.address,
+      deliveryDate: form.deliveryDate,
+      paymentMethod: form.paymentMethod,
+    };
+
     if (form.paymentMethod === 'online') {
-      const orderData = {
-        items,
-        totalPrice,
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        address: form.address,
-        deliveryDate: form.deliveryDate,
-      };
-      // Passer les données via sessionStorage ou URL
       sessionStorage.setItem('orderData', JSON.stringify(orderData));
       router.push('/commande/paiement');
       return;
     }
 
-    // Paiement à la livraison
-    console.log('Commande à la livraison', { items, totalPrice, ...form });
-    clearCart();
-    setSubmitted(true);
+    setProcessing(true);
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Erreur lors de la création de la commande');
+      }
+
+      clearCart();
+      setSubmitted(true);
+      router.push(`/commande/confirmation?orderId=${data.id}`);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de l\'enregistrement de la commande');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   if (items.length === 0 && !submitted) {
@@ -247,9 +265,10 @@ export default function CheckoutPage() {
         <div className="flex gap-4">
           <button 
             type="submit" 
-            className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold transition"
+            disabled={processing}
+            className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition"
           >
-            {form.paymentMethod === 'online' ? 'Procéder au paiement' : 'Confirmer la commande'}
+            {processing ? 'Enregistrement en cours...' : form.paymentMethod === 'online' ? 'Procéder au paiement' : 'Confirmer la commande'}
           </button>
           <Link 
             href="/panier" 
