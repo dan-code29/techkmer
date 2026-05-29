@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Colonne 1 : description de l'entreprise */}
         <div>
-          <h3 className="text-xl font-bold mb-2">Smart Redos Tech</h3>
+          <h3 className="text-xl font-bold mb-2">Tech Innov'Solutions</h3>
           <p className="text-gray-300 mb-2">
             <strong>Connecter • Éclairer • Protéger</strong>
           </p>
