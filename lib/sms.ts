@@ -10,7 +10,7 @@ const SMS_PROVIDER = process.env.SMS_PROVIDER || 'mock'; // 'twilio', 'vonage', 
 export async function sendOrderSMS(phone: string, orderId: number, deliveryDate: string) {
   if (!phone) return;
 
-  const message = `Techkmer: Commande #${orderId} confirmée. Livraison prévue le ${new Date(deliveryDate).toLocaleDateString('fr-FR')}. Nous vous appellerons pour confirmer.`;
+  const message = `Tech Innov'Solutions: Commande #${orderId} confirmée. Livraison prévue le ${new Date(deliveryDate).toLocaleDateString('fr-FR')}. Nous vous appellerons pour confirmer.`;
 
   try {
     if (SMS_PROVIDER === 'twilio') {
@@ -34,7 +34,7 @@ export async function sendOrderSMS(phone: string, orderId: number, deliveryDate:
 export async function sendPaymentConfirmationSMS(phone: string, orderId: number, amount: number) {
   if (!phone) return;
 
-  const message = `Techkmer: Paiement de ${amount} FCFA confirmé pour commande #${orderId}. Merci!`;
+  const message = `Tech Innov'Solutions: Paiement de ${amount} FCFA confirmé pour commande #${orderId}. Merci!`;
 
   try {
     if (SMS_PROVIDER === 'twilio') {
@@ -57,7 +57,7 @@ export async function sendPaymentConfirmationSMS(phone: string, orderId: number,
 export async function sendDeliveryNotificationSMS(phone: string, orderId: number) {
   if (!phone) return;
 
-  const message = `Techkmer: Votre commande #${orderId} sera livrée aujourd'hui. Assurez-vous d'être disponible.`;
+  const message = `Tech Innov'Solutions: Votre commande #${orderId} sera livrée aujourd'hui. Assurez-vous d'être disponible.`;
 
   try {
     if (SMS_PROVIDER === 'twilio') {
@@ -126,7 +126,7 @@ async function sendViaVonage(phone: string, message: string) {
       api_key: vonageApiKey,
       api_secret: vonageApiSecret,
       to: phone,
-      from: 'Techkmer',
+      from: 'Tech Innov'Solutions',
       text: message,
     }).toString(),
   });

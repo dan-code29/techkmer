@@ -6,15 +6,15 @@ export async function sendConfirmationEmail(name: string, email: string, message
   try {
     // Email de confirmation au client
     const { data: clientData, error: clientError } = await resend.emails.send({
-      from: 'Techkmer <onboarding@resend.dev>',
+      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
       to: [email],
-      subject: 'Confirmation de votre demande de devis - Techkmer',
+      subject: 'Confirmation de votre demande de devis - Tech Innov\'Solutions',
       html: `
         <h1>Bonjour ${name},</h1>
         <p>Nous avons bien reçu votre demande de devis. Voici un récapitulatif :</p>
         <p><strong>Message :</strong> ${message}</p>
         <p>Nous reviendrons vers vous dans les plus brefs délais.</p>
-        <p>L'équipe Techkmer</p>
+        <p>L'équipe Tech Innov'Solutions</p>
       `,
     });
 
@@ -25,7 +25,7 @@ export async function sendConfirmationEmail(name: string, email: string, message
     // Email à l'administrateur
     const adminEmail = process.env.ADMIN_EMAIL || 'dancheffo29@gmail.com';
     const { error: adminError } = await resend.emails.send({
-      from: 'Techkmer <onboarding@resend.dev>',
+      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
       to: [adminEmail],
       subject: 'Nouvelle demande de devis',
       html: `
@@ -57,7 +57,7 @@ export async function sendOrderConfirmationEmail(
 ) {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || 'dancheffo29@gmail.com';
-    const appUrl = process.env.APP_URL || 'https://techkmer.com';
+    const appUrl = process.env.APP_URL || 'https://techinnovsolutions.com';
 
     const itemsHtml = items
       .map(
@@ -118,7 +118,7 @@ export async function sendOrderConfirmationEmail(
           </p>
           
           <p style="color: #666; font-size: 14px; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-            <strong>Techkmer</strong><br/>
+            <strong>Tech Innov'Solutions</strong><br/>
             Solutions électriques et domotiques<br/>
             <a href="${appUrl}" style="color: #059669; text-decoration: none;">${appUrl}</a>
           </p>
@@ -127,7 +127,7 @@ export async function sendOrderConfirmationEmail(
     `;
 
     const { error } = await resend.emails.send({
-      from: 'Techkmer <onboarding@resend.dev>',
+      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
       to: [email],
       subject: `Commande confirmée - #${orderId}`,
       html,
@@ -144,7 +144,47 @@ export async function sendOrderConfirmationEmail(
     throw error;
   }
 }
+export async function sendPasswordResetEmail(name: string, email: string, token: string) {
+  try {
+    const appUrl = process.env.NEXTAUTH_URL || process.env.APP_URL || 'http://localhost:3000';
+    const resetUrl = `${appUrl.replace(/\/$/, '')}/reset-password/${token}`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <div style="background-color: #059669; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
+          <h1 style="margin: 0;">Réinitialisation du mot de passe</h1>
+        </div>
+        <div style="padding: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+          <p>Bonjour ${name},</p>
+          <p>Nous avons reçu une demande de réinitialisation de votre mot de passe.</p>
+          <p>Pour définir un nouveau mot de passe, cliquez sur le bouton ci-dessous :</p>
+          <p style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #059669; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px;">Réinitialiser mon mot de passe</a>
+          </p>
+          <p>Ce lien expirera dans 1 heure.</p>
+          <p>Si vous n'avez pas demandé ce changement, vous pouvez ignorer ce message.</p>
+          <p style="color: #666; font-size: 14px; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+            L'équipe Tech Innov'Solutions
+          </p>
+        </div>
+      </div>
+    `;
 
+    const { error } = await resend.emails.send({
+      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
+      to: [email],
+      subject: 'Réinitialisation de votre mot de passe - Tech Innov\'Solutions',
+      html,
+    });
+
+    if (error) {
+      console.error('Erreur Resend (mot de passe oublié):', error);
+      throw error;
+    }
+  } catch (error) {
+    console.error('Erreur d’envoi de l’email de réinitialisation:', error);
+    throw error;
+  }
+}
 /**
  * Envoyer email de notification admin pour nouvelle commande
  */
@@ -158,7 +198,7 @@ export async function sendOrderNotificationToAdmin(
 ) {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || 'dancheffo29@gmail.com';
-    const appUrl = process.env.APP_URL || 'https://techkmer.com';
+    const appUrl = process.env.APP_URL || 'https://techinnovsolutions.com';
 
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
@@ -184,7 +224,7 @@ export async function sendOrderNotificationToAdmin(
     `;
 
     const { error } = await resend.emails.send({
-      from: 'Techkmer <onboarding@resend.dev>',
+      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
       to: [adminEmail],
       subject: `Nouvelle commande : #${orderId} - ${totalPrice.toLocaleString('fr-FR')} FCFA`,
       html,

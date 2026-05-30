@@ -68,7 +68,7 @@ export default function ServicesPage() {
 
       {/* Avantages */}
       <div className="mt-16 bg-gray-100 rounded-xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Pourquoi choisir Techkmer ?</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Pourquoi choisir Tech Innov'Solutions ?</h2>
         <div className="grid md:grid-cols-3 gap-6 text-center">
           <div>
             <div className="text-3xl mb-2">✔️</div>

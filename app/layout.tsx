@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Redos Tech - Connecter, éclairer, protéger",
+  title: "Tech Innov'Solutions - Connecter, éclairer, protéger",
   description: "Solutions techniques complètes : électricité, informatique, sécurité électronique. Installation, maintenance et conseils par des experts qualifiés.",
 };
 

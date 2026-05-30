@@ -5,7 +5,7 @@ import Carousel from '@/components/Carousel';
 export default function MaintenancePage() {
   const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+33712345678';
   const whatsappLink = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
-  const telegramLink = 'https://t.me/techkmer';
+  const telegramLink = 'https://t.me/techinnovsolutions';
 
   // Services de maintenance existants
   const services = [

@@ -104,7 +104,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Qui sommes-nous ?</h2>
           <p className="text-gray-700 max-w-2xl mx-auto">
-            Techkmer est une entreprise spécialisée dans la vente de matériel informatique,
+            Tech Innov'Solutions est une entreprise spécialisée dans la vente de matériel informatique,
             sécurité électronique, électricité et domotique. Nous accompagnons particuliers
             et entreprises de l’installation à la maintenance, avec une équipe de techniciens
             expérimentés et une volonté de vous offrir un service de qualité.

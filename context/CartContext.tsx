@@ -27,7 +27,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Charger le panier depuis localStorage au démarrage
   useEffect(() => {
-    const savedCart = localStorage.getItem('techkmer-cart');
+    const savedCart = localStorage.getItem('techinnovsolutions-cart');
     if (savedCart) {
       try {
         setItems(JSON.parse(savedCart));
@@ -39,7 +39,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Sauvegarder le panier dans localStorage à chaque modification
   useEffect(() => {
-    localStorage.setItem('techkmer-cart', JSON.stringify(items));
+    localStorage.setItem('techinnovsolutions-cart', JSON.stringify(items));
   }, [items]);
 
   const addItem = (newItem: Omit<CartItem, 'quantity'>) => {
