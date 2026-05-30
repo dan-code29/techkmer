@@ -126,7 +126,7 @@ async function sendViaVonage(phone: string, message: string) {
       api_key: vonageApiKey,
       api_secret: vonageApiSecret,
       to: phone,
-      from: 'Tech Innov'Solutions',
+      from: "Tech Innov'Solutions",
       text: message,
     }).toString(),
   });
