@@ -54,16 +54,10 @@ export default function LoginPage() {
           Se connecter
         </button>
       </form>
-      <div className="mt-4 text-center space-y-2">
+      <div className="mt-4 text-center">
         <p>
           <Link href="/reset-password" className="text-blue-600 hover:underline">
             Mot de passe oublié ?
-          </Link>
-        </p>
-        <p>
-          Pas encore de compte ?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline">
-            S'inscrire
           </Link>
         </p>
       </div>

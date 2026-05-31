@@ -60,7 +60,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col items-center gap-2">
                 <FaVideo className="text-cyan-400" size={26} />
-                <span>Contrôle</span>
+                <span>Contrôle d'accès</span>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <FaWrench className="text-cyan-400" size={26} />

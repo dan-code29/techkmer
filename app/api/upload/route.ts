@@ -11,6 +11,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
+    // Sur Vercel, le disque n'est pas persistant et on ne peut pas écrire dans public
+    if (process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
+      return NextResponse.json(
+        {
+          error:
+            'Upload impossible en production sur Vercel : le stockage local n’est pas persistant. Utilisez un service de stockage externe (Cloudinary, S3, etc.).',
+        },
+        { status: 500 }
+      );
+    }
+
     // Récupération du fichier
     const formData = await request.formData();
     const file = formData.get('image') as File;
