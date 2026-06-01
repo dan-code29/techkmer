@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import ChatWidget from "@/components/ChatWidget";
 import Providers from "./providers";          // SessionProvider
 import { CartProvider } from "@/context/CartContext";   // ← import du panier
 
@@ -38,6 +39,7 @@ export default function RootLayout({
             <main className="flex-grow">{children}</main>
             <ScrollToTop />
             <Footer />
+            <ChatWidget />
           </CartProvider>
         </Providers>
       </body>
