@@ -4,9 +4,9 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
-import ChatWidget from "@/components/ChatWidget";
+import BotpressChat from "@/components/BotpressChat";
 import Providers from "./providers";          // SessionProvider
-import { CartProvider } from "@/context/CartContext";   // ← import du panier
+import { CartProvider } from "@/context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,13 +33,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 flex flex-col min-h-screen`}
       >
-        <Providers>                 {/* SessionProvider */}
-          <CartProvider>            {/* Provider du panier */}
+        <Providers>                 {/* SessionProvider NextAuth */}
+          <CartProvider>            {/* Panier global */}
             <Navbar />
             <main className="flex-grow">{children}</main>
-            <ScrollToTop />
+            <ScrollToTop />         {/* Bouton remonter en haut */}
             <Footer />
-            <ChatWidget />
+            <BotpressChat />        {/* Chatbot (Botpress) */}
           </CartProvider>
         </Providers>
       </body>
