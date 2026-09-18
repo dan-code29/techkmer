@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/format';
+import { useLanguage } from '@/lib/i18n';
 
 type Product = {
   id: number;
@@ -19,6 +20,7 @@ type Product = {
 
 export default function BoutiquePage() {
   const { addItem } = useCart();
+  const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -77,14 +79,14 @@ export default function BoutiquePage() {
     setTimeout(() => setShowAlert(false), 2000);
   };
 
-  if (loading) return <div className="text-center py-12">Chargement des produits...</div>;
+  if (loading) return <div className="text-center py-12">{t('loading')}</div>;
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8 text-center">Notre boutique</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">{t('shopTitle')}</h1>
       {showAlert && (
         <div className="fixed top-20 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
-          {lastProduct} ajouté au panier !
+          {lastProduct} {t('addedCart')}
         </div>
       )}
 
@@ -101,22 +103,22 @@ export default function BoutiquePage() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              {cat === 'all' ? 'Tous les articles' : cat}
+              {cat === 'all' ? t('allProducts') : cat}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <label htmlFor="sort" className="text-gray-700">Trier par :</label>
+          <label htmlFor="sort" className="text-gray-700">{t('sortBy')}</label>
           <select
             id="sort"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
             className="border rounded px-3 py-2 bg-white"
           >
-            <option value="default">Par défaut</option>
-            <option value="price-asc">Prix croissant</option>
-            <option value="price-desc">Prix décroissant</option>
-            <option value="best-seller">Meilleures ventes</option>
+            <option value="default">{t('defaultSort')}</option>
+            <option value="price-asc">{t('priceAsc')}</option>
+            <option value="price-desc">{t('priceDesc')}</option>
+            <option value="best-seller">{t('bestSeller')}</option>
           </select>
         </div>
       </div>
@@ -142,14 +144,14 @@ export default function BoutiquePage() {
                 onClick={() => handleAddToCart(product)}
                 className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
               >
-                Ajouter au panier
+                {t('addCart')}
               </button>
             </div>
           </div>
         ))}
       </div>
       {filteredProducts.length === 0 && (
-        <div className="text-center py-12 text-gray-500">Aucun produit trouvé.</div>
+        <div className="text-center py-12 text-gray-500">{t('noProduct')}</div>
       )}
     </div>
   );

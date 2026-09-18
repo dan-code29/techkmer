@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tech Innov'Solutions - Connecter, éclairer, protéger",
-  description: "Solutions techniques complètes : électricité, informatique, sécurité électronique. Installation, maintenance et conseils par des experts qualifiés.",
+  title: "WISEBUILD Smart Systems - Des bâtiments plus sûrs et plus intelligents",
+  description: "WISEBUILD conçoit, installe et maintient des solutions électriques, solaires, réseau, sécurité électronique et domotique au Cameroun.",
 };
 
 export default function RootLayout({

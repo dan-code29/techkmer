@@ -13,7 +13,6 @@ import {
   MdPhone, 
   MdElectricBolt, 
   MdSecurity,
-  MdBuild
 } from 'react-icons/md';
 import { FiZap } from 'react-icons/fi';
 
@@ -30,15 +29,15 @@ export default function Footer() {
           {/* Colonne 1 */}
           <div>
             <h3 className="text-3xl font-bold tracking-wide mb-4">
-              <span className="text-white">Tech Innov'</span>
-              <span className="text-cyan-400">Solutions</span>
+              <span className="text-white">WISEBUILD</span>
+              <span className="text-cyan-400"> Smart Systems</span>
             </h3>
             <p className="text-cyan-400 font-semibold tracking-wider mb-4">
               Connecter • Éclairer • Protéger
             </p>
             <p className="text-gray-300 leading-relaxed text-sm">
-              Solutions techniques complètes : électricité, informatique, domotique et sécurité électronique.
-              Installation, maintenance et conseils par des experts qualifiés.
+              WISEBUILD Smart Systems conçoit, installe et maintient des solutions électriques,
+              solaires, réseau, de sécurité électronique et de domotique au Cameroun.
             </p>
             {/* Services Icons avec react-icons */}
             <div className="grid grid-cols-3 gap-4 mt-8 text-center text-xs">
@@ -60,7 +59,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col items-center gap-2">
                 <FaVideo className="text-cyan-400" size={26} />
-                <span>Contrôle d'accès</span>
+                <span>Contrôle d&apos;accès</span>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <FaWrench className="text-cyan-400" size={26} />
@@ -89,7 +88,7 @@ export default function Footer() {
               <li><FiZap className="inline mr-2" /> Électricité générale</li>
               <li><FaNetworkWired className="inline mr-2" /> Réseaux informatiques</li>
               <li><FaHome className="inline mr-2" /> Domotique & Smart Home</li>
-              <li><MdSecurity className="inline mr-2" /> Sécurité électronique</li>
+              <li><MdSecurity className="inline mr-2" /> Sécurité électronique, alarmes &amp; contrôle d&apos;accès</li>
               <li><FaVideo className="inline mr-2" /> Vidéosurveillance</li>
               <li>🚪 Motorisation de portail</li>
               <li>🔐 Contrôle d’accès</li>
@@ -128,7 +127,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-white/10 mt-14 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <p>© {new Date().getFullYear()} Tech Innov'Solutions. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} WISEBUILD Smart Systems. Tous droits réservés.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-cyan-400 transition">Politique de confidentialité</Link>
             <Link href="/mentions" className="hover:text-cyan-400 transition">Mentions légales</Link>

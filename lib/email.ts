@@ -6,15 +6,15 @@ export async function sendConfirmationEmail(name: string, email: string, message
   try {
     // Email de confirmation au client
     const { data: clientData, error: clientError } = await resend.emails.send({
-      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
+      from: 'WISEBUILD <onboarding@resend.dev>',
       to: [email],
-      subject: 'Confirmation de votre demande de devis - Tech Innov\'Solutions',
+      subject: 'Confirmation de votre demande de devis - WISEBUILD',
       html: `
         <h1>Bonjour ${name},</h1>
         <p>Nous avons bien reçu votre demande de devis. Voici un récapitulatif :</p>
         <p><strong>Message :</strong> ${message}</p>
         <p>Nous reviendrons vers vous dans les plus brefs délais.</p>
-        <p>L'équipe Tech Innov'Solutions</p>
+        <p>L'équipe WISEBUILD Smart Systems</p>
       `,
     });
 
@@ -25,7 +25,7 @@ export async function sendConfirmationEmail(name: string, email: string, message
     // Email à l'administrateur
     const adminEmail = process.env.ADMIN_EMAIL || 'dancheffo29@gmail.com';
     const { error: adminError } = await resend.emails.send({
-      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
+      from: 'WISEBUILD <onboarding@resend.dev>',
       to: [adminEmail],
       subject: 'Nouvelle demande de devis',
       html: `
@@ -118,7 +118,7 @@ export async function sendOrderConfirmationEmail(
           </p>
           
           <p style="color: #666; font-size: 14px; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-            <strong>Tech Innov'Solutions</strong><br/>
+            <strong>WISEBUILD Smart Systems</strong><br/>
             Solutions électriques et domotiques<br/>
             <a href="${appUrl}" style="color: #059669; text-decoration: none;">${appUrl}</a>
           </p>
@@ -127,7 +127,7 @@ export async function sendOrderConfirmationEmail(
     `;
 
     const { error } = await resend.emails.send({
-      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
+      from: 'WISEBUILD <onboarding@resend.dev>',
       to: [email],
       subject: `Commande confirmée - #${orderId}`,
       html,
@@ -163,16 +163,16 @@ export async function sendPasswordResetEmail(name: string, email: string, token:
           <p>Ce lien expirera dans 1 heure.</p>
           <p>Si vous n'avez pas demandé ce changement, vous pouvez ignorer ce message.</p>
           <p style="color: #666; font-size: 14px; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
-            L'équipe Tech Innov'Solutions
+            L'équipe WISEBUILD Smart Systems
           </p>
         </div>
       </div>
     `;
 
     const { error } = await resend.emails.send({
-      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
+      from: 'WISEBUILD <onboarding@resend.dev>',
       to: [email],
-      subject: 'Réinitialisation de votre mot de passe - Tech Innov\'Solutions',
+      subject: 'Réinitialisation de votre mot de passe - WISEBUILD',
       html,
     });
 
@@ -224,7 +224,7 @@ export async function sendOrderNotificationToAdmin(
     `;
 
     const { error } = await resend.emails.send({
-      from: 'Tech Innov\'Solutions <onboarding@resend.dev>',
+      from: 'WISEBUILD <onboarding@resend.dev>',
       to: [adminEmail],
       subject: `Nouvelle commande : #${orderId} - ${totalPrice.toLocaleString('fr-FR')} FCFA`,
       html,

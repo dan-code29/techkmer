@@ -1,8 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import Carousel from '@/components/Carousel';
+import { useLanguage } from '@/lib/i18n';
 
 export default function InstallationPage() {
+  const { t } = useLanguage();
   const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+237 697654023';
   const whatsappLink = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
   const telegramLink = 'https://t.me/Dan_Cheff';
@@ -39,7 +43,7 @@ export default function InstallationPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-center mb-4">Installation sur mesure</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">{t('installation')} sur mesure</h1>
       <p className="text-center text-gray-600 mb-6">
         Nous installons tous vos équipements (électricité, domotique, sécurité, informatique).
         Contactez-nous directement ou demandez un devis.
@@ -59,7 +63,7 @@ export default function InstallationPage() {
       </div>
 
       {/* Services d'installation */}
-      <h2 className="text-2xl font-bold text-center mb-8">Nos prestations d'installation</h2>
+      <h2 className="text-2xl font-bold text-center mb-8">{t('installation')} &amp; mise en service</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
         {services.map((s) => (
           <div key={s.title} className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition">

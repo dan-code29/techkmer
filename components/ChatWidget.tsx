@@ -14,7 +14,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState([
     {
       from: 'bot',
-      text: "Bonjour ! Je suis votre assistant Tech Innov' Solutions. Posez une question ou contactez-nous sur WhatsApp.",
+      text: "Bonjour ! Je suis votre assistant WISEBUILD. Posez une question ou contactez-nous sur WhatsApp.",
     },
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -57,7 +57,7 @@ export default function ChatWidget() {
         <div className="w-80 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-2xl backdrop-blur-lg">
           <div className="flex items-center justify-between border-b pb-3 mb-3 gap-3">
             <div>
-              <p className="text-sm font-semibold">Assistant Tech Innov'Solutions</p>
+              <p className="text-sm font-semibold">Assistant WISEBUILD</p>
               <p className="text-xs text-slate-500">Chat en direct / WhatsApp</p>
             </div>
             <div className="relative h-12 w-12 rounded-full overflow-hidden border border-slate-200">
@@ -138,7 +138,7 @@ export default function ChatWidget() {
         className="flex items-center justify-between gap-3 rounded-full bg-blue-600 px-4 py-3 text-white shadow-2xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
       >
         <div className="text-left">
-          <div className="font-semibold">Besoin d'aide ?</div>
+          <div className="font-semibold">Besoin d&apos;aide ?</div>
           <div className="text-xs text-cyan-100/90">Chat / WhatsApp</div>
         </div>
         <div className="relative h-10 w-10 rounded-full overflow-hidden border border-white/60 bg-white">

@@ -1,34 +1,37 @@
+'use client';
+
 import Link from 'next/link';
-import Image from 'next/image';
+import { useLanguage } from '@/lib/i18n';
 
 export default function ServicesPage() {
+  const { t } = useLanguage();
   const services = [
     {
-      title: "Vente d'équipements",
-      description: "Matériel informatique, sécurité électronique, électricité, domotique. Marques de qualité.",
-      icon: "🛒",
-      link: "/boutique",
+      title: t('electrical'),
+      description: "Électricité bâtiment, rénovation, maintenance et énergie solaire pour améliorer l’autonomie de vos espaces.",
+      icon: "⚡",
+      link: "/installation",
       color: "bg-blue-500",
     },
     {
-      title: "Installation & mise en service",
-      description: "Installation professionnelle de vos équipements par nos techniciens experts.",
-      icon: "🔧",
-      link: "/installation",
+      title: t('security'),
+      description: "Vidéosurveillance, alarmes, contrôle d’accès, clôture électrique et supervision intelligente des bâtiments.",
+      icon: "🛡",
+      link: "/maintenance",
       color: "bg-green-500",
     },
     {
-      title: "Maintenance & dépannage",
-      description: "Entretien, réparation et dépannage pour particuliers et entreprises.",
-      icon: "🛠️",
-      link: "/maintenance",
+      title: t('smart'),
+      description: "Domotique, automatisation des portails, éclairage connecté et solutions Smart Building pilotables à distance.",
+      icon: "🏠",
+      link: "/installation",
       color: "bg-orange-500",
     },
     {
-      title: "Devis personnalisés",
-      description: "Demandez un devis gratuit pour vos projets sur mesure.",
-      icon: "📄",
-      link: "/devis",
+      title: t('storePole'),
+      description: "Vente en ligne d’équipements électriques, réseau, CCTV, solaire, domotique et sécurité électronique.",
+      icon: "🛒",
+      link: "/boutique",
       color: "bg-purple-500",
     },
   ];
@@ -37,10 +40,10 @@ export default function ServicesPage() {
     <div className="container mx-auto px-4 py-12">
       {/* Section intro */}
       <div className="text-center max-w-3xl mx-auto mb-12">
-        <h1 className="text-4xl font-bold mb-4">Nos services</h1>
+        <h1 className="text-4xl font-bold mb-4">{t('fourPoles')}</h1>
         <p className="text-lg text-gray-600">
-          Vous recherchez un partenaire de confiance pour vos équipements électriques, informatiques et de sécurité électronique ?
-          Nous vous proposons des solutions complètes allant de la vente à l’installation, jusqu’à la maintenance.
+          Vous recherchez un partenaire de confiance pour vos équipements électriques, solaires, réseau et de sécurité électronique ?
+          {t('expertiseText')}
         </p>
       </div>
 
@@ -68,7 +71,7 @@ export default function ServicesPage() {
 
       {/* Avantages */}
       <div className="mt-16 bg-gray-100 rounded-xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Pourquoi choisir Tech Innov'Solutions ?</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">{t('whoWeAre')} WISEBUILD</h2>
         <div className="grid md:grid-cols-3 gap-6 text-center">
           <div>
             <div className="text-3xl mb-2">✔️</div>

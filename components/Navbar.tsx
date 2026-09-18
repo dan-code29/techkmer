@@ -4,22 +4,25 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
+import { useLanguage } from '@/lib/i18n';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Navbar() {
   const { data: session } = useSession();
   const { totalItems } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t } = useLanguage();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   // Liens communs
   const links = [
-    { href: '/', label: 'Accueil' },
-    { href: '/services', label: 'Services' },
-    { href: '/installation', label: 'Installation' },
-    { href: '/maintenance', label: 'Maintenance' },
-    { href: '/boutique', label: 'Boutique' },
-    { href: '/devis', label: 'Devis' },
+    { href: '/', label: t('home') },
+    { href: '/services', label: t('services') },
+    { href: '/installation', label: t('installation') },
+    { href: '/maintenance', label: t('maintenance') },
+    { href: '/boutique', label: t('store') },
+    { href: '/devis', label: t('quote') },
   ];
 
   return (
@@ -31,14 +34,14 @@ export default function Navbar() {
             
             <Image
                         src="/images/logo.png"
-                        alt="Logo Tech Innov'Solutions"
+                        alt="Logo WISEBUILD Smart Systems"
                         width={4000}
                         height={4000}
                         className="object-contain"
                     />
           </div>
 
-          <span className="text-lg font-bold hidden sm:inline">Tech Innov'Solutions</span>
+          <span className="text-lg font-bold hidden sm:inline">WISEBUILD</span>
         </Link>
 
         {/* Bouton hamburger (mobile) */}
@@ -71,7 +74,7 @@ export default function Navbar() {
             </Link>
           ))}
           <Link href="/panier" className="relative hover:underline">
-            🛒 Panier
+            🛒 {t('cart')}
             {totalItems > 0 && (
               <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {totalItems}
@@ -79,23 +82,24 @@ export default function Navbar() {
             )}
           </Link>
           {session?.user?.role === 'admin' && (
-            <Link href="/admin" className="hover:underline">Admin</Link>
+            <Link href="/admin" className="hover:underline">{t('admin')}</Link>
           )}
           {session ? (
             <button
               onClick={() => signOut()}
               className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition"
             >
-              Déconnexion
+              {t('logout')}
             </button>
           ) : (
             <Link
               href="/login"
               className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-100 transition"
             >
-              Connexion
+              {t('login')}
             </Link>
           )}
+          <LanguageSwitcher />
         </div>
       </div>
 
@@ -117,7 +121,7 @@ export default function Navbar() {
             className="block py-2 hover:underline relative"
             onClick={toggleMenu}
           >
-            🛒 Panier
+            🛒 {t('cart')}
             {totalItems > 0 && (
               <span className="ml-1 inline-block bg-red-500 text-white text-xs rounded-full w-5 h-5 text-center leading-5">
                 {totalItems}
@@ -126,7 +130,7 @@ export default function Navbar() {
           </Link>
           {session?.user?.role === 'admin' && (
             <Link href="/admin" className="block py-2 hover:underline" onClick={toggleMenu}>
-              Admin
+              {t('admin')}
             </Link>
           )}
           {session ? (
@@ -137,7 +141,7 @@ export default function Navbar() {
               }}
               className="block w-full text-left bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition"
             >
-              Déconnexion
+              {t('logout')}
             </button>
           ) : (
             <Link
@@ -145,9 +149,10 @@ export default function Navbar() {
               className="block py-2 hover:underline"
               onClick={toggleMenu}
             >
-              Connexion
+              {t('login')}
             </Link>
           )}
+          <LanguageSwitcher />
         </div>
       )}
     </nav>

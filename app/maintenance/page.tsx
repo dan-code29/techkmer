@@ -1,8 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import Carousel from '@/components/Carousel';
+import { useLanguage } from '@/lib/i18n';
 
 export default function MaintenancePage() {
+  const { t } = useLanguage();
   const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+33712345678';
   const whatsappLink = `https://wa.me/${phone.replace(/[^0-9]/g, '')}`;
   const telegramLink = 'https://t.me/techinnovsolutions';
@@ -40,7 +44,7 @@ export default function MaintenancePage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-center mb-4">Maintenance & Dépannage</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">{t('maintenance')} &amp; Dépannage</h1>
       <p className="text-center text-gray-600 mb-6">
         Nous intervenons pour les particuliers et les entreprises afin d'assurer le bon fonctionnement de vos installations.
       </p>
@@ -72,7 +76,7 @@ export default function MaintenancePage() {
       </div>
 
       {/* Services de maintenance */}
-      <h2 className="text-2xl font-bold text-center mb-8">Nos services de maintenance</h2>
+      <h2 className="text-2xl font-bold text-center mb-8">{t('maintenance')}</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
         {services.map((s) => (
           <div key={s.title} className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition">
