@@ -57,6 +57,8 @@ const BOUTIQUE_MENU = [
   { href: '/boutique?cat=Accessories', icon: FaBox, label: 'Accessoires & Câblage' },
 ];
 
+
+
 // ============================================================================
 //  TYPES POUR LA SEARCHBAR
 // ============================================================================
@@ -345,14 +347,15 @@ export default function Navbar() {
   }, [lastScrollY]);
 
   // Liens principaux (affichés AU-DESSUS de la quick nav)
-  const links = [
-    { href: '/', label: t('home') || 'Accueil' },
-    { href: '/services', label: t('services') || 'Services', hasDropdown: 'solutions' },
-    { href: '/realisations', label: t('projects') || 'Nos réalisations' },
-    { href: '/boutique', label: t('store') || 'Boutique', hasDropdown: 'boutique' },
-    { href: '/about', label: t('about') || 'À propos' },
-    { href: '/contact', label: t('contact') || 'Contact' },
-  ];
+ const links = [
+  { href: '/', label: t('home') || 'Accueil' },
+  { href: '/services', label: t('services') || 'Services', hasDropdown: 'solutions' },
+  { href: '/configurateur', label: '🎯 Configurateur' },   // ✅ AJOUTÉ
+  { href: '/realisations', label: t('projects') || 'Nos réalisations' },
+  { href: '/boutique', label: t('store') || 'Boutique', hasDropdown: 'boutique' },
+  { href: '/about', label: t('about') || 'À propos' },
+  { href: '/contact', label: t('contact') || 'Contact' },
+];
 
   return (
     <nav className="sticky top-0 z-50">
