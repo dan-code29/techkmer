@@ -194,7 +194,7 @@ function SearchBar({ variant = 'desktop', onNavigate }: { variant?: 'desktop' | 
         </div>
         <button
           onClick={() => { if (query.trim()) { saveRecentSearch(query.trim()); navigate(`/boutique?q=${encodeURIComponent(query.trim())}`); } }}
-          className="bg-gradient-to-r from-[#00C2FF] to-[#0066FF] hover:from-[#00a8dd] hover:to-[#0052cc] text-white font-bold px-6 rounded-r-xl text-sm transition shadow-lg shadow-[#00C2FF]/20 flex items-center gap-2"
+          className="bg-linear-to-r from-[#00C2FF] to-[#0066FF] hover:from-[#00a8dd] hover:to-[#0052cc] text-white font-bold px-6 rounded-r-xl text-sm transition shadow-lg shadow-[#00C2FF]/20 flex items-center gap-2"
         >
           <FaSearch size={14} />
           <span className="hidden sm:inline">Rechercher</span>
@@ -353,7 +353,7 @@ export default function Navbar() {
   { href: '/configurateur', label: '🎯 Configurateur' },   // ✅ AJOUTÉ
   { href: '/realisations', label: t('projects') || 'Nos réalisations' },
   { href: '/boutique', label: t('store') || 'Boutique', hasDropdown: 'boutique' },
-  { href: '/about', label: t('about') || 'À propos' },
+  { href: '/about', label: 'À propos' },
   { href: '/contact', label: t('contact') || 'Contact' },
 ];
 
