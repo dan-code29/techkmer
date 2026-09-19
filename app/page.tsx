@@ -1,16 +1,14 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useCart } from '@/context/CartContext';
-import { useSession } from 'next-auth/react';
 import { formatPrice } from '@/lib/format';
 import {
-  FaBolt, FaSun, FaNetworkWired, FaShieldAlt, FaHome, FaVideo,
-  FaLock, FaDoorOpen, FaWrench, FaArrowRight, FaWhatsapp, FaPhone,
-  FaEnvelope, FaSearch, FaUser, FaShoppingCart, FaBars, FaTimes,
-  FaCheckCircle, FaCog,
+  FaBolt, FaSun, FaNetworkWired, FaShieldAlt, FaHome,
+  FaDoorOpen, FaArrowRight, FaWhatsapp, FaPhone,
+  FaEnvelope, FaCog, FaStar, FaQuoteLeft,
+  FaClipboardList, FaSearchDollar, FaTools, FaHeadset,
 } from 'react-icons/fa';
 
 /* ------------------------------------------------------------------ */
@@ -103,30 +101,98 @@ const SOLUTION_FINDER = [
   { icon: FaBolt, label: 'Installation électrique', href: '/devis?domaine=electricite' },
 ];
 
+const HOW_IT_WORKS = [
+  { n: 1, icon: FaClipboardList, title: 'Audit du besoin', desc: 'Nous analysons votre projet et vos contraintes.' },
+  { n: 2, icon: FaSearchDollar, title: 'Devis gratuit', desc: 'Proposition transparente sous 24h, sans engagement.' },
+  { n: 3, icon: FaTools, title: 'Installation', desc: 'Conception, pose et mise en service par nos techniciens.' },
+  { n: 4, icon: FaHeadset, title: 'Maintenance', desc: 'Suivi, garantie 12 mois et assistance continue.' },
+];
+
+const TESTIMONIALS = [
+  {
+    name: 'Marie N.',
+    role: 'Directrice — Cabinet médical, Douala',
+    text: 'Équipe très professionnelle. Ils ont installé notre système de vidéosurveillance et l’alarme en une journée. Zéro problème depuis 8 mois.',
+    rating: 5,
+  },
+  {
+    name: 'Jean-Pierre T.',
+    role: 'Propriétaire villa, Bafoussam',
+    text: 'Installation solaire impeccable. Nous avons maintenant de l’électricité même pendant les coupures. Explications claires et suivi assuré.',
+    rating: 5,
+  },
+  {
+    name: 'Estelle M.',
+    role: 'Responsable IT — PME, Yaoundé',
+    text: 'Ils ont refait tout notre réseau et câblage. La différence de débit est spectaculaire. Documentation livrée et support réactif.',
+    rating: 5,
+  },
+];
+
+const STATS = [
+  { value: 150, suffix: '+', label: 'Projets réalisés' },
+  { value: 10, suffix: '', label: 'Régions couvertes' },
+  { value: 24, suffix: 'h', label: 'Délai de réponse' },
+  { value: 100, suffix: '%', label: 'Clients satisfaits' },
+];
+
+/* ------------------------------------------------------------------ */
+/*  HOOK COMPTEUR ANIMÉ                                                */
+/* ------------------------------------------------------------------ */
+function useCountUp(target: number, duration = 1500, start = false) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!start) return;
+    let startTime: number | null = null;
+    let raf: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setCount(Math.floor(progress * target));
+      if (progress < 1) raf = requestAnimationFrame(step);
+    };
+
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, start]);
+
+  return count;
+}
+
 /* ------------------------------------------------------------------ */
 /*  HOME PAGE                                                          */
 /* ------------------------------------------------------------------ */
 export default function HomePage() {
-  const { totalItems } = useCart();
-  const { data: session } = useSession();
-
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
 
+  /* Chargement produits */
   useEffect(() => {
-    Promise.all([
-      fetch('/api/products').then((r) => r.json()),
-      fetch('/api/categories').then((r) => r.json()).catch(() => []),
-    ])
-      .then(([prods, cats]) => {
-        setProducts(Array.isArray(prods) ? prods : []);
-        setCategories(Array.isArray(cats) ? cats : []);
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data) => {
+        setProducts(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  }, []);
+
+  /* Observer pour déclencher les compteurs */
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setStatsVisible(true);
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const promoProducts = useMemo(
@@ -149,136 +215,12 @@ export default function HomePage() {
     [products]
   );
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (search.trim()) window.location.href = `/boutique?q=${encodeURIComponent(search.trim())}`;
-  };
-
   return (
     <div className="bg-white">
       {/* ============================================================ */}
-      {/*  TOP BAR                                                     */}
-      {/* ============================================================ */}
-      <div className="bg-[#050B16] text-gray-300 text-xs md:text-sm">
-        <div className="container mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-4">
-            <span>🚚 Livraison Douala & Yaoundé</span>
-            <span className="hidden md:inline">⚡ Devis en 24h</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <a href="https://wa.me/237697654023" target="_blank" rel="noreferrer" className="hover:text-cyan-400 transition flex items-center gap-1">
-              <FaWhatsapp /> WhatsApp
-            </a>
-            <a href="tel:+237697654023" className="hidden md:flex items-center gap-1 hover:text-cyan-400 transition">
-              <FaPhone size={12} /> 697654023
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================================ */}
-      {/*  HEADER PRINCIPAL                                            */}
-      {/* ============================================================ */}
-      <header className="bg-white border-b sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex items-center gap-4">
-          {/* Burger mobile */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden text-gray-800 p-2"
-            aria-label="Menu"
-          >
-            {menuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
-          </button>
-
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0066FF] to-[#00C2FF] flex items-center justify-center text-white font-bold text-sm">
-              WB
-            </div>
-            <div className="hidden sm:block">
-              <p className="font-bold text-base leading-none text-[#050B16]">WISE BUILD</p>
-              <p className="text-[9px] text-[#00C2FF] tracking-[0.2em] font-semibold">
-                SMART SYSTEMS
-              </p>
-            </div>
-          </Link>
-
-          {/* Nav desktop */}
-          <nav className="hidden lg:flex items-center gap-6 ml-6 text-sm font-semibold text-[#050B16]">
-            <Link href="/services" className="hover:text-[#0066FF] transition">Solutions</Link>
-            <Link href="/services" className="hover:text-[#0066FF] transition">Services</Link>
-            <Link href="/boutique" className="hover:text-[#0066FF] transition">Boutique</Link>
-            <Link href="/realisations" className="hover:text-[#0066FF] transition">Projets</Link>
-            <Link href="/about" className="hover:text-[#0066FF] transition">À propos</Link>
-            <Link href="/contact" className="hover:text-[#0066FF] transition">Contact</Link>
-          </nav>
-
-          {/* Recherche desktop */}
-          <form onSubmit={handleSearch} className="hidden xl:flex flex-1 max-w-md ml-auto">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher un produit, une solution…"
-              className="w-full border border-gray-300 border-r-0 rounded-l-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00C2FF]"
-            />
-            <button type="submit" className="bg-[#0066FF] hover:bg-[#0052cc] text-white px-4 rounded-r-lg">
-              <FaSearch size={14} />
-            </button>
-          </form>
-
-          {/* Compte + Panier */}
-          <div className="flex items-center gap-3 ml-auto xl:ml-0">
-            <Link
-              href={session ? '/compte' : '/login'}
-              className="hidden sm:flex items-center gap-2 text-sm text-[#050B16] hover:text-[#0066FF] transition"
-            >
-              <FaUser size={16} />
-              <span className="hidden lg:block font-semibold">
-                {session ? session.user?.name || 'Compte' : 'Connexion'}
-              </span>
-            </Link>
-            <Link href="/panier" className="relative text-[#050B16] hover:text-[#0066FF] transition p-2">
-              <FaShoppingCart size={20} />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-
-        {/* Nav mobile */}
-        {menuOpen && (
-          <nav className="lg:hidden border-t bg-white px-4 py-3 flex flex-col gap-3 text-sm font-semibold text-[#050B16]">
-            <Link href="/services" onClick={() => setMenuOpen(false)}>Solutions</Link>
-            <Link href="/services" onClick={() => setMenuOpen(false)}>Services</Link>
-            <Link href="/boutique" onClick={() => setMenuOpen(false)}>Boutique</Link>
-            <Link href="/realisations" onClick={() => setMenuOpen(false)}>Projets</Link>
-            <Link href="/about" onClick={() => setMenuOpen(false)}>À propos</Link>
-            <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
-            <form onSubmit={handleSearch} className="flex pt-2">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher…"
-                className="w-full border border-gray-300 rounded-l-lg px-3 py-2 text-sm"
-              />
-              <button className="bg-[#0066FF] text-white px-4 rounded-r-lg">
-                <FaSearch size={14} />
-              </button>
-            </form>
-          </nav>
-        )}
-      </header>
-
-      {/* ============================================================ */}
-      {/*  HERO                                                         */}
+      {/*  HERO                                                        */}
       {/* ============================================================ */}
       <section className="relative bg-[#050B16] text-white overflow-hidden">
-        {/* Background image */}
         <div className="absolute inset-0">
           <Image
             src="/images/hero/smart-building.jpg"
@@ -291,7 +233,6 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#00C2FF,transparent_45%)] opacity-20" />
         </div>
 
-        {/* Contenu */}
         <div className="relative container mx-auto px-6 md:px-12 py-24 md:py-32 max-w-3xl">
           <span className="inline-block bg-[#0066FF]/20 border border-[#00C2FF]/40 text-[#00C2FF] text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest">
             SMART SYSTEMS & TECHNOLOGIES
@@ -327,7 +268,6 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Micro-trust */}
           <div className="flex flex-wrap gap-6 mt-10 text-sm text-gray-400">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
@@ -336,6 +276,23 @@ export default function HomePage() {
             <span>✓ Techniciens certifiés</span>
             <span>✓ Garantie 12 mois</span>
           </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/*  STATS ANIMÉES (nouveau)                                     */}
+      {/* ============================================================ */}
+      <section ref={statsRef} className="bg-white border-b">
+        <div className="container mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          {STATS.map((s) => (
+            <StatItem
+              key={s.label}
+              value={s.value}
+              suffix={s.suffix}
+              label={s.label}
+              start={statsVisible}
+            />
+          ))}
         </div>
       </section>
 
@@ -416,9 +373,48 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================ */}
-      {/*  OUR PROJECTS                                                */}
+      {/*  HOW IT WORKS (nouveau)                                      */}
       {/* ============================================================ */}
       <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
+              How it works
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">
+              Votre projet en 4 étapes
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            {/* Ligne de connexion (desktop) */}
+            <div className="hidden lg:block absolute top-12 left-[12%] right-[12%] h-0.5 bg-[#00C2FF]/20 z-0" />
+
+            {HOW_IT_WORKS.map((step) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.n} className="relative z-10 text-center">
+                  <div className="w-24 h-24 mx-auto rounded-2xl bg-white border-2 border-[#0066FF] flex items-center justify-center shadow-lg mb-4 relative">
+                    <Icon className="text-[#0066FF]" size={32} />
+                    <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#0066FF] text-white text-sm font-bold flex items-center justify-center">
+                      {step.n}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-[#050B16] mb-2">{step.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">
+                    {step.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/*  OUR PROJECTS                                                */}
+      {/* ============================================================ */}
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-end justify-between mb-10">
             <div>
@@ -466,7 +462,7 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/*  BOUTIQUE : PROMOS + BEST SELLERS + NEW ARRIVALS             */}
       {/* ============================================================ */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-2">
@@ -480,7 +476,6 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Promotions */}
           {promoProducts.length > 0 && (
             <div className="mb-16">
               <div className="flex items-center gap-3 mb-6">
@@ -498,7 +493,6 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Best sellers */}
           {bestSellers.length > 0 && (
             <div className="mb-16">
               <div className="flex items-center gap-3 mb-6">
@@ -516,7 +510,6 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Nouveautés */}
           {newArrivals.length > 0 && (
             <div>
               <div className="flex items-center gap-3 mb-6">
@@ -537,6 +530,45 @@ export default function HomePage() {
           {loading && (
             <p className="text-center text-gray-400 py-10">Chargement des produits…</p>
           )}
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/*  TÉMOIGNAGES (nouveau)                                       */}
+      {/* ============================================================ */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
+              Témoignages
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">
+              Ils nous font confiance
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.name}
+                className="bg-gray-50 rounded-2xl p-6 border border-gray-100 relative hover:shadow-lg transition"
+              >
+                <FaQuoteLeft className="text-[#00C2FF]/30 absolute top-6 right-6" size={28} />
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: t.rating }).map((_, i) => (
+                    <FaStar key={i} className="text-amber-400" size={14} />
+                  ))}
+                </div>
+                <p className="text-gray-700 leading-relaxed mb-5 italic">
+                  « {t.text} »
+                </p>
+                <div>
+                  <p className="font-bold text-[#050B16]">{t.name}</p>
+                  <p className="text-xs text-gray-500">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -620,6 +652,34 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  STAT ITEM (compteur animé)                                         */
+/* ------------------------------------------------------------------ */
+function StatItem({
+  value,
+  suffix,
+  label,
+  start,
+}: {
+  value: number;
+  suffix: string;
+  label: string;
+  start: boolean;
+}) {
+  const count = useCountUp(value, 1500, start);
+  return (
+    <div>
+      <p className="text-3xl md:text-4xl font-bold text-[#0066FF]">
+        {count}
+        {suffix}
+      </p>
+      <p className="text-xs md:text-sm text-gray-500 mt-1 uppercase tracking-wide">
+        {label}
+      </p>
     </div>
   );
 }
