@@ -13,13 +13,11 @@ import BotpressChat from "@/components/BotpressChat";
 // ============================================================================
 //  IMPORTS DES PROVIDERS (Contextes globaux)
 // ============================================================================
-import Providers from "./providers";                       // SessionProvider (NextAuth)
-import { CartProvider } from "@/context/CartContext";       // Panier
-import { WishlistProvider } from "@/context/WishlistContext"; // Favoris (NOUVEAU)
+import Providers from "./providers";
+import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
+import LanguageProvider from "@/components/LanguageProvider";   // ✅ AJOUTÉ
 
-// ============================================================================
-//  POLICES GOOGLE (Geist Sans + Geist Mono)
-// ============================================================================
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,18 +28,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// ============================================================================
-//  MÉTADONNÉES SEO
-// ============================================================================
 export const metadata: Metadata = {
   title: "WISEBUILD Smart Systems - Des bâtiments plus sûrs et plus intelligents",
   description:
     "WISEBUILD conçoit, installe et maintient des solutions électriques, solaires, réseau, sécurité électronique et domotique au Cameroun.",
 };
 
-// ============================================================================
-//  LAYOUT RACINE
-// ============================================================================
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -54,32 +46,26 @@ export default function RootLayout({
       >
         {/* ----------------------------------------------------------------
             ORDRE DES PROVIDERS (important) :
-            1. Providers         → SessionProvider (NextAuth) — le plus global
-            2. CartProvider      → Panier
-            3. WishlistProvider  → Favoris (NOUVEAU)
+            1. LanguageProvider  → Langue (FR/EN) — le plus global
+            2. Providers         → SessionProvider (NextAuth)
+            3. CartProvider      → Panier
+            4. WishlistProvider  → Favoris
         ---------------------------------------------------------------- */}
-        <Providers>
-          <CartProvider>
-            <WishlistProvider>
+        <LanguageProvider>          {/* ✅ AJOUTÉ EN PREMIER */}
+          <Providers>
+            <CartProvider>
+              <WishlistProvider>
 
-              {/* Navigation principale (sticky) */}
-              <Navbar />
+                <Navbar />
+                <main className="flex-grow">{children}</main>
+                <ScrollToTop />
+                <Footer />
+                <BotpressChat />
 
-              {/* Contenu des pages */}
-              <main className="flex-grow">{children}</main>
-
-              {/* Bouton "Retour en haut" flottant */}
-              <ScrollToTop />
-
-              {/* Pied de page */}
-              <Footer />
-
-              {/* Chatbot Botpress */}
-              <BotpressChat />
-
-            </WishlistProvider>
-          </CartProvider>
-        </Providers>
+              </WishlistProvider>
+            </CartProvider>
+          </Providers>
+        </LanguageProvider>
       </body>
     </html>
   );
