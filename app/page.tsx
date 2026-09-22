@@ -1,5 +1,8 @@
 'use client';
 
+// ============================================================================
+//  IMPORTS
+// ============================================================================
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,9 +14,9 @@ import {
   FaClipboardList, FaSearchDollar, FaTools, FaHeadset,
 } from 'react-icons/fa';
 
-/* ------------------------------------------------------------------ */
-/*  TYPES                                                              */
-/* ------------------------------------------------------------------ */
+// ============================================================================
+//  TYPES
+// ============================================================================
 type Product = {
   id: number;
   name: string;
@@ -25,18 +28,20 @@ type Product = {
   dateAdded: string;
 };
 
-/* ------------------------------------------------------------------ */
-/*  DONNÉES STATIQUES                                                   */
-/* ------------------------------------------------------------------ */
+// ============================================================================
+//  DONNÉES STATIQUES
+// ============================================================================
+
+// ✅ SOLUTIONS — Chaque lien pointe vers une PAGE DÉDIÉE
 const SOLUTIONS = [
   {
-    id: 'energy',
+    id: 'electrical',
     icon: FaBolt,
     label: 'ENERGY',
     subtitle: 'Électricité & Solaire',
     items: ['Systèmes électriques', 'Énergie solaire', 'Onduleurs & batteries', 'Éclairage'],
     color: 'text-amber-400',
-    href: '/services#electrical',
+    href: '/solutions/electrical',      // ✅ Page dédiée
   },
   {
     id: 'connectivity',
@@ -45,7 +50,7 @@ const SOLUTIONS = [
     subtitle: 'Réseaux & Informatique',
     items: ['Infrastructure réseau', 'Wi-Fi pro', 'Câblage structuré', 'Téléphonie IP'],
     color: 'text-blue-400',
-    href: '/services#network',
+    href: '/solutions/connectivity',    // ✅ Page dédiée
   },
   {
     id: 'smart',
@@ -54,7 +59,7 @@ const SOLUTIONS = [
     subtitle: 'Domotique & Automatisation',
     items: ['Domotique', 'Éclairage intelligent', 'Accès connecté', 'Scénarios'],
     color: 'text-cyan-400',
-    href: '/services#smart',
+    href: '/solutions/smart',           // ✅ Page dédiée
   },
   {
     id: 'security',
@@ -63,7 +68,7 @@ const SOLUTIONS = [
     subtitle: 'Sécurité électronique',
     items: ['Vidéosurveillance', 'Contrôle d’accès', 'Alarmes', 'Clôtures électriques'],
     color: 'text-red-400',
-    href: '/services#security',
+    href: '/solutions/security',        // ✅ Page dédiée
   },
   {
     id: 'automation',
@@ -72,7 +77,7 @@ const SOLUTIONS = [
     subtitle: 'Automatisation',
     items: ['Portails motorisés', 'Portes automatiques', 'Barrières', 'Industriel'],
     color: 'text-purple-400',
-    href: '/services#automation',
+    href: '/solutions/automation',      // ✅ Page dédiée
   },
 ];
 
@@ -109,24 +114,9 @@ const HOW_IT_WORKS = [
 ];
 
 const TESTIMONIALS = [
-  {
-    name: 'Marie N.',
-    role: 'Directrice — Cabinet médical, Douala',
-    text: 'Équipe très professionnelle. Ils ont installé notre système de vidéosurveillance et l’alarme en une journée. Zéro problème depuis 8 mois.',
-    rating: 5,
-  },
-  {
-    name: 'Jean-Pierre T.',
-    role: 'Propriétaire villa, Bafoussam',
-    text: 'Installation solaire impeccable. Nous avons maintenant de l’électricité même pendant les coupures. Explications claires et suivi assuré.',
-    rating: 5,
-  },
-  {
-    name: 'Estelle M.',
-    role: 'Responsable IT — PME, Yaoundé',
-    text: 'Ils ont refait tout notre réseau et câblage. La différence de débit est spectaculaire. Documentation livrée et support réactif.',
-    rating: 5,
-  },
+  { name: 'Marie N.', role: 'Directrice — Cabinet médical, Douala', text: 'Équipe très professionnelle. Ils ont installé notre système de vidéosurveillance et l\'alarme en une journée. Zéro problème depuis 8 mois.', rating: 5 },
+  { name: 'Jean-Pierre T.', role: 'Propriétaire villa, Bafoussam', text: 'Installation solaire impeccable. Nous avons maintenant de l\'électricité même pendant les coupures.', rating: 5 },
+  { name: 'Estelle M.', role: 'Responsable IT — PME, Yaoundé', text: 'Ils ont refait tout notre réseau et câblage. La différence de débit est spectaculaire.', rating: 5 },
 ];
 
 const STATS = [
@@ -136,9 +126,9 @@ const STATS = [
   { value: 100, suffix: '%', label: 'Clients satisfaits' },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  HOOK COMPTEUR ANIMÉ                                                */
-/* ------------------------------------------------------------------ */
+// ============================================================================
+//  HOOK COMPTEUR ANIMÉ
+// ============================================================================
 function useCountUp(target: number, duration = 1500, start = false) {
   const [count, setCount] = useState(0);
 
@@ -161,16 +151,15 @@ function useCountUp(target: number, duration = 1500, start = false) {
   return count;
 }
 
-/* ------------------------------------------------------------------ */
-/*  HOME PAGE                                                          */
-/* ------------------------------------------------------------------ */
+// ============================================================================
+//  HOME PAGE
+// ============================================================================
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const statsRef = useRef<HTMLDivElement>(null);
   const [statsVisible, setStatsVisible] = useState(false);
 
-  /* Chargement produits */
   useEffect(() => {
     fetch('/api/products')
       .then((r) => r.json())
@@ -181,76 +170,61 @@ export default function HomePage() {
       .catch(() => setLoading(false));
   }, []);
 
-  /* Observer pour déclencher les compteurs */
   useEffect(() => {
     const el = statsRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setStatsVisible(true);
-      },
+      ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
       { threshold: 0.3 }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  const promoProducts = useMemo(
-    () => products.filter((p) => p.isPromotion === 1).slice(0, 4),
-    [products]
-  );
-  const bestSellers = useMemo(
-    () => [...products].sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 4),
-    [products]
-  );
-  const newArrivals = useMemo(
-    () =>
-      [...products]
-        .sort((a, b) => {
-          const da = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
-          const db = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
-          return db - da;
-        })
-        .slice(0, 4),
-    [products]
-  );
+  const promoProducts = useMemo(() => products.filter((p) => p.isPromotion === 1).slice(0, 4), [products]);
+  const bestSellers = useMemo(() => [...products].sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 4), [products]);
+  const newArrivals = useMemo(() => [...products].sort((a, b) => {
+    const da = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
+    const db = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
+    return db - da;
+  }).slice(0, 4), [products]);
 
   return (
     <div className="bg-white">
-      {/* ============================================================ */}
-      {/*  HERO                                                        */}
-      {/* ============================================================ */}
-      <section className="relative bg-[#050B16] text-white overflow-hidden">
+
+      {/* ==================================================================
+          HERO — Image de fond CHEFFBUILD
+      ================================================================== */}
+      <section className="relative text-white overflow-hidden min-h-[600px] flex items-center">
         <div className="absolute inset-0">
           <Image
             src="/images/hero/smart-building.jpg"
-            alt="Smart building"
+            alt="CHEFFBUILD Smart Building"
             fill
-            className="object-cover opacity-40"
+            className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050B16] via-[#050B16]/85 to-[#050B16]/40" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#00C2FF,transparent_45%)] opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050B16]/95 via-[#050B16]/75 to-[#050B16]/30" />
         </div>
 
         <div className="relative container mx-auto px-6 md:px-12 py-24 md:py-32 max-w-3xl">
-          <span className="inline-block bg-[#0066FF]/20 border border-[#00C2FF]/40 text-[#00C2FF] text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest">
-            SMART SYSTEMS & TECHNOLOGIES
+          <span className="inline-block bg-white/10 backdrop-blur-md border border-white/30 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest shadow-lg">
+            SMART BUILDING & TECHNICAL SOLUTIONS
           </span>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] mb-6">
-            SMART TECHNOLOGY
+            Smart Solutions
             <br />
-            FOR <span className="text-[#00C2FF]">SMARTER SPACES</span>
+            for a <span className="text-[#00C2FF]">Better Tomorrow</span>
           </h1>
 
-          <p className="text-base md:text-lg text-gray-300 mb-2 tracking-wider font-medium">
-            ⚡ Electrical • ☀️ Solar • 🌐 Networking • 🏠 Automation • 🛡️ Security
+          <p className="text-base md:text-lg text-gray-200 mb-2 tracking-wider font-medium">
+            ⚡ Energy • 🌐 Connectivity • 🏠 Automation • 🛡️ Security
           </p>
 
-          <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-xl">
-            Nous concevons, installons et maintenons des systèmes techniques complets
-            pour les bâtiments modernes.
+          <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-xl">
+            CHEFFBUILD conçoit, installe et maintient des systèmes techniques complets
+            pour les bâtiments modernes au Cameroun.
           </p>
 
           <div className="flex flex-wrap gap-4">
@@ -258,17 +232,17 @@ export default function HomePage() {
               href="/services"
               className="bg-[#0066FF] hover:bg-[#0052cc] text-white font-bold py-4 px-8 rounded-lg transition flex items-center gap-2 shadow-lg shadow-[#0066FF]/30"
             >
-              EXPLORE SOLUTIONS <FaArrowRight />
+              EXPLORER NOS SOLUTIONS <FaArrowRight />
             </Link>
             <Link
               href="/devis"
-              className="border-2 border-white/30 hover:border-[#00C2FF] hover:text-[#00C2FF] text-white font-bold py-4 px-8 rounded-lg transition"
+              className="border-2 border-white/40 hover:border-[#00C2FF] hover:text-[#00C2FF] backdrop-blur-sm text-white font-bold py-4 px-8 rounded-lg transition"
             >
-              REQUEST A QUOTE
+              DEMANDER UN DEVIS
             </Link>
           </div>
 
-          <div className="flex flex-wrap gap-6 mt-10 text-sm text-gray-400">
+          <div className="flex flex-wrap gap-6 mt-10 text-sm text-gray-300">
             <span className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               Disponible 24/7
@@ -279,28 +253,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  STATS ANIMÉES (nouveau)                                     */}
-      {/* ============================================================ */}
+      {/* ==================================================================
+          STATS ANIMÉES
+      ================================================================== */}
       <section ref={statsRef} className="bg-white border-b">
         <div className="container mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {STATS.map((s) => (
-            <StatItem
-              key={s.label}
-              value={s.value}
-              suffix={s.suffix}
-              label={s.label}
-              start={statsVisible}
-            />
+            <StatItem key={s.label} value={s.value} suffix={s.suffix} label={s.label} start={statsVisible} />
           ))}
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  OUR SOLUTIONS (5 piliers)                                   */}
-      {/* ============================================================ */}
-      <section className="py-20 bg-[#050B16] text-white">
-        <div className="container mx-auto px-4">
+      {/* ==================================================================
+          OUR SOLUTIONS — 5 piliers avec liens DÉDIÉS
+      ================================================================== */}
+      <section className="relative py-20 text-white overflow-hidden">
+        {/* Image de fond */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/hero/solutions-bg.jpg"
+            alt="Nos solutions techniques"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[#050B16]/92" />
+        </div>
+
+        <div className="relative container mx-auto px-4">
           <div className="text-center mb-14">
             <p className="text-[#00C2FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
               Our Solutions
@@ -308,9 +287,8 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
               One company. <span className="text-[#00C2FF]">Complete solutions.</span>
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Cinq pôles techniques, une seule équipe pour concevoir, installer et maintenir
-              l'ensemble de vos infrastructures.
+            <p className="text-gray-300 max-w-2xl mx-auto">
+              Cinq pôles techniques, une seule équipe pour concevoir, installer et maintenir l'ensemble de vos infrastructures.
             </p>
           </div>
 
@@ -328,7 +306,7 @@ export default function HomePage() {
                     {s.label}
                   </h3>
                   <p className="text-base font-semibold mb-3">{s.subtitle}</p>
-                  <ul className="space-y-1.5 mb-5 text-xs text-gray-400">
+                  <ul className="space-y-1.5 mb-5 text-xs text-gray-300">
                     {s.items.map((it) => (
                       <li key={it} className="flex items-start gap-2">
                         <span className="text-[#00C2FF]">•</span>
@@ -346,9 +324,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  WHY CHOOSE US                                               */}
-      {/* ============================================================ */}
+      {/* ==================================================================
+          WHY CHOOSE US
+      ================================================================== */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
@@ -356,7 +334,7 @@ export default function HomePage() {
               Pourquoi nous choisir
             </p>
             <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">
-              Why choose us?
+              Why choose CHEFFBUILD?
             </h2>
           </div>
 
@@ -372,9 +350,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  HOW IT WORKS (nouveau)                                      */}
-      {/* ============================================================ */}
+      {/* ==================================================================
+          HOW IT WORKS
+      ================================================================== */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
@@ -387,9 +365,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-            {/* Ligne de connexion (desktop) */}
             <div className="hidden lg:block absolute top-12 left-[12%] right-[12%] h-0.5 bg-[#00C2FF]/20 z-0" />
-
             {HOW_IT_WORKS.map((step) => {
               const Icon = step.icon;
               return (
@@ -401,9 +377,7 @@ export default function HomePage() {
                     </span>
                   </div>
                   <h3 className="font-bold text-[#050B16] mb-2">{step.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">
-                    {step.desc}
-                  </p>
+                  <p className="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">{step.desc}</p>
                 </div>
               );
             })}
@@ -411,9 +385,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  OUR PROJECTS                                                */}
-      {/* ============================================================ */}
+      {/* ==================================================================
+          OUR PROJECTS
+      ================================================================== */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-end justify-between mb-10">
@@ -425,27 +399,15 @@ export default function HomePage() {
                 Ce que nous réalisons
               </h2>
             </div>
-            <Link
-              href="/realisations"
-              className="text-[#0066FF] font-semibold hover:underline flex items-center gap-2"
-            >
+            <Link href="/realisations" className="text-[#0066FF] font-semibold hover:underline flex items-center gap-2">
               Voir tous les projets <FaArrowRight size={12} />
             </Link>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {PROJECTS.map((p) => (
-              <Link
-                key={p.title}
-                href="/realisations"
-                className="group relative h-72 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition"
-              >
-                <Image
-                  src={p.img}
-                  alt={p.title}
-                  fill
-                  className="object-cover group-hover:scale-110 transition duration-500"
-                />
+              <Link key={p.title} href="/realisations" className="group relative h-72 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition">
+                <Image src={p.img} alt={p.title} fill className="object-cover group-hover:scale-110 transition duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-5 text-white">
                   <span className="inline-block bg-[#00C2FF] text-[#050B16] text-[10px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest">
@@ -459,33 +421,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  BOUTIQUE : PROMOS + BEST SELLERS + NEW ARRIVALS             */}
-      {/* ============================================================ */}
+      {/* ==================================================================
+          BOUTIQUE
+      ================================================================== */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-2">
-              Shop Our Products
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#050B16] mb-3">
-              Équipements professionnels
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Les produits que nous installons, disponibles dans notre boutique en ligne.
-            </p>
+            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-2">Shop Our Products</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#050B16] mb-3">Équipements professionnels</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">Les produits que nous installons, disponibles dans notre boutique en ligne.</p>
           </div>
 
           {promoProducts.length > 0 && (
             <div className="mb-16">
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-2xl">🔥</span>
-                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">
-                  Offres spéciales
-                </h3>
-                <Link href="/boutique?filter=promo" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">
-                  Tout voir →
-                </Link>
+                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">Offres spéciales</h3>
+                <Link href="/boutique?filter=promo" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">Tout voir →</Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {promoProducts.map((p) => <ProductCard key={p.id} product={p} highlight />)}
@@ -497,12 +449,8 @@ export default function HomePage() {
             <div className="mb-16">
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-2xl">⭐</span>
-                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">
-                  Best Sellers
-                </h3>
-                <Link href="/boutique?filter=best" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">
-                  Tout voir →
-                </Link>
+                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">Best Sellers</h3>
+                <Link href="/boutique?filter=best" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">Tout voir →</Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {bestSellers.map((p) => <ProductCard key={p.id} product={p} />)}
@@ -514,12 +462,8 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-2xl">🆕</span>
-                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">
-                  Nouveautés
-                </h3>
-                <Link href="/boutique" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">
-                  Tout voir →
-                </Link>
+                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">Nouveautés</h3>
+                <Link href="/boutique" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">Tout voir →</Link>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {newArrivals.map((p) => <ProductCard key={p.id} product={p} />)}
@@ -527,41 +471,30 @@ export default function HomePage() {
             </div>
           )}
 
-          {loading && (
-            <p className="text-center text-gray-400 py-10">Chargement des produits…</p>
-          )}
+          {loading && <p className="text-center text-gray-400 py-10">Chargement des produits…</p>}
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  TÉMOIGNAGES (nouveau)                                       */}
-      {/* ============================================================ */}
+      {/* ==================================================================
+          TÉMOIGNAGES
+      ================================================================== */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
-              Témoignages
-            </p>
-            <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">
-              Ils nous font confiance
-            </h2>
+            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">Témoignages</p>
+            <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">Ils nous font confiance</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t) => (
-              <div
-                key={t.name}
-                className="bg-gray-50 rounded-2xl p-6 border border-gray-100 relative hover:shadow-lg transition"
-              >
+              <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 relative hover:shadow-lg transition">
                 <FaQuoteLeft className="text-[#00C2FF]/30 absolute top-6 right-6" size={28} />
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: t.rating }).map((_, i) => (
                     <FaStar key={i} className="text-amber-400" size={14} />
                   ))}
                 </div>
-                <p className="text-gray-700 leading-relaxed mb-5 italic">
-                  « {t.text} »
-                </p>
+                <p className="text-gray-700 leading-relaxed mb-5 italic">« {t.text} »</p>
                 <div>
                   <p className="font-bold text-[#050B16]">{t.name}</p>
                   <p className="text-xs text-gray-500">{t.role}</p>
@@ -572,32 +505,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  SOLUTION FINDER                                             */}
-      {/* ============================================================ */}
-      <section className="py-20 bg-[#050B16] text-white">
-        <div className="container mx-auto px-4 max-w-5xl">
+      {/* ==================================================================
+          SOLUTION FINDER
+      ================================================================== */}
+      <section className="relative py-20 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-[#050B16]" />
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,#00C2FF,transparent_60%)]" />
+        <div className="relative container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
-            <p className="text-[#00C2FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
-              Solution Finder
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">
-              De quoi avez-vous besoin ?
-            </h2>
-            <p className="text-gray-400">
-              Choisissez votre besoin — nous vous guidons vers la bonne solution.
-            </p>
+            <p className="text-[#00C2FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">Solution Finder</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">De quoi avez-vous besoin ?</h2>
+            <p className="text-gray-400">Choisissez votre besoin — nous vous guidons vers la bonne solution.</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {SOLUTION_FINDER.map((s) => {
               const Icon = s.icon;
               return (
-                <Link
-                  key={s.label}
-                  href={s.href}
-                  className="group flex items-center gap-3 bg-white/5 border border-white/10 hover:border-[#00C2FF] hover:bg-[#00C2FF]/10 rounded-xl p-4 transition"
-                >
+                <Link key={s.label} href={s.href} className="group flex items-center gap-3 bg-white/5 border border-white/10 hover:border-[#00C2FF] hover:bg-[#00C2FF]/10 rounded-xl p-4 transition">
                   <span className="w-10 h-10 rounded-lg bg-[#00C2FF]/20 flex items-center justify-center text-[#00C2FF] shrink-0">
                     <Icon size={18} />
                   </span>
@@ -610,9 +535,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/*  CTA FINAL                                                   */}
-      {/* ============================================================ */}
+      {/* ==================================================================
+          CTA FINAL
+      ================================================================== */}
       <section className="py-24 bg-gradient-to-br from-[#0066FF] to-[#00C2FF] text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('/images/circuit-pattern.png')] bg-cover" />
         <div className="relative container mx-auto px-4 text-center max-w-3xl">
@@ -621,23 +546,15 @@ export default function HomePage() {
           </h2>
           <p className="text-lg text-white/90 mb-10">
             De l'énergie à la connectivité, de l'automatisation à la sécurité —
-            nous concevons et intégrons des solutions techniques complètes.
+            CHEFFBUILD conçoit et intègre des solutions techniques complètes.
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/devis"
-              className="bg-white text-[#0066FF] font-bold py-4 px-10 rounded-lg transition hover:bg-gray-100 shadow-xl"
-            >
-              REQUEST A QUOTE
+            <Link href="/devis" className="bg-white text-[#0066FF] font-bold py-4 px-10 rounded-lg transition hover:bg-gray-100 shadow-xl">
+              DEMANDER UN DEVIS
             </Link>
-            <a
-              href="https://wa.me/237697654023"
-              target="_blank"
-              rel="noreferrer"
-              className="bg-[#050B16] text-white font-bold py-4 px-10 rounded-lg transition hover:bg-black flex items-center gap-2"
-            >
-              <FaWhatsapp /> TALK TO AN EXPERT
+            <a href="https://wa.me/237697654023" target="_blank" rel="noreferrer" className="bg-[#050B16] text-white font-bold py-4 px-10 rounded-lg transition hover:bg-black flex items-center gap-2">
+              <FaWhatsapp /> PARLER À UN EXPERT
             </a>
           </div>
 
@@ -648,7 +565,7 @@ export default function HomePage() {
             <a href="mailto:dancheffo29@gmail.com" className="flex items-center gap-2 hover:text-white">
               <FaEnvelope /> dancheffo29@gmail.com
             </a>
-            <span>📍 Douala, Cameroun</span>
+            <span>📍 Yaoundé, Cameroun</span>
           </div>
         </div>
       </section>
@@ -656,84 +573,32 @@ export default function HomePage() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  STAT ITEM (compteur animé)                                         */
-/* ------------------------------------------------------------------ */
-function StatItem({
-  value,
-  suffix,
-  label,
-  start,
-}: {
-  value: number;
-  suffix: string;
-  label: string;
-  start: boolean;
-}) {
+// ============================================================================
+//  SOUS-COMPOSANTS
+// ============================================================================
+function StatItem({ value, suffix, label, start }: { value: number; suffix: string; label: string; start: boolean }) {
   const count = useCountUp(value, 1500, start);
   return (
     <div>
-      <p className="text-3xl md:text-4xl font-bold text-[#0066FF]">
-        {count}
-        {suffix}
-      </p>
-      <p className="text-xs md:text-sm text-gray-500 mt-1 uppercase tracking-wide">
-        {label}
-      </p>
+      <p className="text-3xl md:text-4xl font-bold text-[#0066FF]">{count}{suffix}</p>
+      <p className="text-xs md:text-sm text-gray-500 mt-1 uppercase tracking-wide">{label}</p>
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  PRODUCT CARD                                                       */
-/* ------------------------------------------------------------------ */
-function ProductCard({
-  product,
-  highlight = false,
-}: {
-  product: Product;
-  highlight?: boolean;
-}) {
-  const imageSrc =
-    product.image && typeof product.image === 'string'
-      ? product.image
-      : '/images/placeholder.jpg';
-
+function ProductCard({ product, highlight = false }: { product: Product; highlight?: boolean }) {
+  const imageSrc = product.image && typeof product.image === 'string' ? product.image : '/images/placeholder.jpg';
   return (
-    <Link
-      href={`/produit/${product.id}`}
-      className={`group bg-white rounded-xl overflow-hidden border transition hover:shadow-2xl hover:-translate-y-1 ${
-        highlight ? 'border-[#00C2FF]/50' : 'border-gray-100'
-      }`}
-    >
+    <Link href={`/produit/${product.id}`} className={`group bg-white rounded-xl overflow-hidden border transition hover:shadow-2xl hover:-translate-y-1 ${highlight ? 'border-[#00C2FF]/50' : 'border-gray-100'}`}>
       <div className="relative h-44 bg-gray-50">
-        <Image
-          src={imageSrc}
-          alt={product.name}
-          fill
-          className="object-contain p-4 group-hover:scale-105 transition duration-300"
-        />
-        {product.isPromotion === 1 && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded">
-            PROMO
-          </span>
-        )}
-        {product.salesCount > 50 && (
-          <span className="absolute top-2 right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded">
-            🔥 TOP
-          </span>
-        )}
+        <Image src={imageSrc} alt={product.name} fill className="object-contain p-4 group-hover:scale-105 transition duration-300" />
+        {product.isPromotion === 1 && <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded">PROMO</span>}
+        {product.salesCount > 50 && <span className="absolute top-2 right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded">🔥 TOP</span>}
       </div>
       <div className="p-4">
-        <p className="text-[10px] text-[#00C2FF] font-bold uppercase tracking-widest mb-1">
-          {product.category}
-        </p>
-        <h3 className="text-sm font-semibold text-[#050B16] line-clamp-2 mb-3 leading-snug min-h-[40px]">
-          {product.name}
-        </h3>
-        <p className="text-[#0066FF] font-bold text-base">
-          {formatPrice(product.price)}
-        </p>
+        <p className="text-[10px] text-[#00C2FF] font-bold uppercase tracking-widest mb-1">{product.category}</p>
+        <h3 className="text-sm font-semibold text-[#050B16] line-clamp-2 mb-3 leading-snug min-h-[40px]">{product.name}</h3>
+        <p className="text-[#0066FF] font-bold text-base">{formatPrice(product.price)}</p>
       </div>
     </Link>
   );
