@@ -29,14 +29,14 @@ export default function Footer() {
           {/* Colonne 1 */}
           <div>
             <h3 className="text-3xl font-bold tracking-wide mb-4">
-              <span className="text-white">WISEBUILD</span>
+              <span className="text-white">CHEFFBUILD</span>
               <span className="text-cyan-400"> Smart Systems</span>
             </h3>
             <p className="text-cyan-400 font-semibold tracking-wider mb-4">
               Connecter • Éclairer • Protéger
             </p>
             <p className="text-gray-300 leading-relaxed text-sm">
-              WISEBUILD Smart Systems conçoit, installe et maintient des solutions électriques,
+              CHEFFBUILD Smart Systems conçoit, installe et maintient des solutions électriques,
               solaires, réseau, de sécurité électronique et de domotique au Cameroun.
             </p>
             {/* Services Icons avec react-icons */}
@@ -127,7 +127,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-white/10 mt-14 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
-          <p>© {new Date().getFullYear()} WISEBUILD Smart Systems. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} CHEFFBUILD Smart Systems. Tous droits réservés.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-cyan-400 transition">Politique de confidentialité</Link>
             <Link href="/mentions" className="hover:text-cyan-400 transition">Mentions légales</Link>

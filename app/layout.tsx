@@ -29,9 +29,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WISEBUILD Smart Systems - Des bâtiments plus sûrs et plus intelligents",
+  title: "CHEFFBUILD Smart Systems - Des bâtiments plus sûrs et plus intelligents",
   description:
-    "WISEBUILD conçoit, installe et maintient des solutions électriques, solaires, réseau, sécurité électronique et domotique au Cameroun.",
+    "CHEFFBUILD conçoit, installe et maintient des solutions électriques, solaires, réseau, sécurité électronique et domotique au Cameroun.",
 };
 
 export default function RootLayout({

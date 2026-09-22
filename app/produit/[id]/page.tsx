@@ -96,10 +96,10 @@ export async function generateMetadata({
   if (!product) return { title: 'Produit non trouvé' };
 
   return {
-    title: `${product.name} — WISEBUILD Smart Systems`,
+    title: `${product.name} — CHEFFBUILD Smart Systems`,
     description: product.description
       ? String(product.description).slice(0, 155)
-      : `Découvrez ${product.name} sur WISEBUILD Smart Systems`,
+      : `Découvrez ${product.name} sur CHEFFBUILD Smart Systems`,
   };
 }
 

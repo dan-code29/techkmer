@@ -37,12 +37,45 @@ import { FaShieldAlt as FaSecurity } from 'react-icons/fa';
 // ============================================================================
 
 // Menu déroulant "Services"
+// ============================================================================
+//  MENU DÉROULANT "SERVICES" — Pointe vers les pages dédiées
+// ============================================================================
 const SOLUTIONS_MENU = [
-  { href: '/services#electrical', icon: FaBolt, label: 'Électricité & Solaire', desc: 'Installation, onduleurs, batteries', color: 'text-amber-500' },
-  { href: '/services#network', icon: FaNetworkWired, label: 'Réseaux & Informatique', desc: 'Câblage, Wi-Fi, baies de brassage', color: 'text-blue-500' },
-  { href: '/services#smart', icon: FaHome, label: 'Domotique & Smart Building', desc: 'Éclairage connecté, scénarios', color: 'text-cyan-500' },
-  { href: '/services#security', icon: FaSecurity, label: 'Sécurité électronique', desc: 'Vidéosurveillance, alarmes, accès', color: 'text-red-500' },
-  { href: '/services#automation', icon: FaDoorOpen, label: 'Automatisation', desc: 'Portails, portes, barrières', color: 'text-purple-500' },
+  {
+    href: '/solutions/electrical',
+    icon: FaBolt,
+    label: 'Électricité & Solaire',
+    desc: 'Installation, onduleurs, batteries',
+    color: 'text-amber-500',
+  },
+  {
+    href: '/solutions/connectivity',
+    icon: FaNetworkWired,
+    label: 'Réseaux & Informatique',
+    desc: 'Câblage, Wi-Fi, baies de brassage',
+    color: 'text-blue-500',
+  },
+  {
+    href: '/solutions/smart',
+    icon: FaHome,
+    label: 'Domotique & Smart Building',
+    desc: 'Éclairage connecté, scénarios',
+    color: 'text-cyan-500',
+  },
+  {
+    href: '/solutions/security',
+    icon: FaSecurity,
+    label: 'Sécurité électronique',
+    desc: 'Vidéosurveillance, alarmes, accès',
+    color: 'text-red-500',
+  },
+  {
+    href: '/solutions/automation',
+    icon: FaDoorOpen,
+    label: 'Automatisation',
+    desc: 'Portails, portes, barrières',
+    color: 'text-purple-500',
+  },
 ];
 
 // Menu déroulant "Boutique"

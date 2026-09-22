@@ -38,7 +38,7 @@ const translations = {
 
     // ---- Tagline / Hero ----
     tagline: 'Building • Energy • Connectivity • Automation • Security',
-    heroEyebrow: 'WISEBUILD SMART SYSTEMS',
+    heroEyebrow: 'CHEFFBUILD SMART SYSTEMS',
     heroTitle: 'Des bâtiments plus sûrs. Plus connectés. Plus intelligents.',
     heroText:
       "Nous bâtissons, connectons, sécurisons et automatisons vos espaces grâce à des solutions intégrées d'électricité, d'énergie, de réseau et de sécurité.",
@@ -50,24 +50,24 @@ const translations = {
     expertise: 'Notre expertise',
     fourPoles: 'Un intégrateur, quatre pôles complémentaires',
     expertiseText:
-      "De l'équipement à la maintenance, WISEBUILD accompagne chaque étape de vos projets techniques.",
-    electrical: 'WISEBUILD ELECTRICAL',
+      "De l'équipement à la maintenance, CHEFFBUILD accompagne chaque étape de vos projets techniques.",
+    electrical: 'CHEFFBUILD ELECTRICAL',
     electricalText:
       'Électricité bâtiment, rénovation, maintenance et solutions solaires pour gagner en autonomie énergétique.',
-    security: 'WISEBUILD SECURITY',
+    security: 'CHEFFBUILD SECURITY',
     securityText:
       "Vidéosurveillance, alarmes, contrôle d'accès, clôtures électriques et supervision intelligente.",
-    smart: 'WISEBUILD SMART',
+    smart: 'CHEFFBUILD SMART',
     smartText:
       'Domotique, automatisation des portails, éclairage connecté et solutions Smart Building.',
-    storePole: 'WISEBUILD STORE',
+    storePole: 'CHEFFBUILD STORE',
     storeText:
       "Une sélection d'équipements électriques, réseau, CCTV, solaire et domotique disponibles en ligne.",
 
     // ---- Qui sommes-nous ----
     whoWeAre: 'Qui sommes-nous ?',
     aboutText:
-      "WISEBUILD Smart Systems est une entreprise d'intégration technologique du bâtiment. Nous concevons, installons et maintenons des infrastructures électriques, solaires, réseau, de sécurité électronique et de domotique pour les PME et les résidences.",
+      "CHEFFBUILD Smart Systems est une entreprise d'intégration technologique du bâtiment. Nous concevons, installons et maintenons des infrastructures électriques, solaires, réseau, de sécurité électronique et de domotique pour les PME et les résidences.",
     learnMore: 'En savoir plus →',
 
     // ---- Projets / CTA ----
@@ -105,7 +105,7 @@ const translations = {
     required: '* Champs obligatoires',
 
     // ---- À propos ----
-    aboutTitle: 'À propos de WISEBUILD Smart Systems',
+    aboutTitle: 'À propos de CHEFFBUILD Smart Systems',
     mission: 'Notre mission',
     poles: 'Nos quatre pôles',
     values: 'Nos valeurs',
@@ -138,7 +138,7 @@ const translations = {
 
     // ---- Tagline / Hero ----
     tagline: 'Building • Energy • Connectivity • Automation • Security',
-    heroEyebrow: 'WISEBUILD SMART SYSTEMS',
+    heroEyebrow: 'CHEFFBUILD SMART SYSTEMS',
     heroTitle: 'Safer. More connected. Smarter buildings.',
     heroText:
       'We build, connect, secure and automate your spaces with integrated electrical, energy, networking and security solutions.',
@@ -150,24 +150,24 @@ const translations = {
     expertise: 'Our expertise',
     fourPoles: 'One integrator, four complementary divisions',
     expertiseText:
-      'From equipment supply to maintenance, WISEBUILD supports every stage of your technical projects.',
-    electrical: 'WISEBUILD ELECTRICAL',
+      'From equipment supply to maintenance, CHEFFBUILD supports every stage of your technical projects.',
+    electrical: 'CHEFFBUILD ELECTRICAL',
     electricalText:
       'Building electrical systems, renovation, maintenance and solar solutions for greater energy independence.',
-    security: 'WISEBUILD SECURITY',
+    security: 'CHEFFBUILD SECURITY',
     securityText:
       'Video surveillance, alarms, access control, electric fencing and intelligent monitoring.',
-    smart: 'WISEBUILD SMART',
+    smart: 'CHEFFBUILD SMART',
     smartText:
       'Home automation, gate automation, connected lighting and Smart Building solutions.',
-    storePole: 'WISEBUILD STORE',
+    storePole: 'CHEFFBUILD STORE',
     storeText:
       'A selection of electrical, networking, CCTV, solar, automation and security equipment available online.',
 
     // ---- Who we are ----
     whoWeAre: 'Who we are',
     aboutText:
-      'WISEBUILD Smart Systems is a building technology integration company. We design, install and maintain electrical, solar, networking, electronic security and automation infrastructure for SMEs and homes.',
+      'CHEFFBUILD Smart Systems is a building technology integration company. We design, install and maintain electrical, solar, networking, electronic security and automation infrastructure for SMEs and homes.',
     learnMore: 'Learn more →',
 
     // ---- Projects / CTA ----
@@ -205,7 +205,7 @@ const translations = {
     required: '* Required fields',
 
     // ---- About ----
-    aboutTitle: 'About WISEBUILD Smart Systems',
+    aboutTitle: 'About CHEFFBUILD Smart Systems',
     mission: 'Our mission',
     poles: 'Our four divisions',
     values: 'Our values',
