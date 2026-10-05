@@ -29,9 +29,33 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CHEFFBUILD Smart Systems - Des bâtiments plus sûrs et plus intelligents",
+  applicationName: "CHEFFBUILD",
+  title: "CHEFFBUILD | Smart Systems",
   description:
     "CHEFFBUILD conçoit, installe et maintient des solutions électriques, solaires, réseau, sécurité électronique et domotique au Cameroun.",
+  keywords: [
+    "CHEFFBUILD",
+    "Smart Systems",
+    "bâtiment intelligent",
+    "électricité",
+    "solaire",
+    "sécurité électronique",
+    "domotique",
+    "Cameroun",
+  ],
+  openGraph: {
+    title: "CHEFFBUILD | Smart Systems",
+    description:
+      "Des bâtiments plus sûrs, plus intelligents et mieux connectés grâce aux solutions CHEFFBUILD.",
+    siteName: "CHEFFBUILD",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CHEFFBUILD | Smart Systems",
+    description:
+      "Des bâtiments plus sûrs, plus intelligents et mieux connectés grâce aux solutions CHEFFBUILD.",
+  },
 };
 
 export default function RootLayout({

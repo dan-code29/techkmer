@@ -23,7 +23,7 @@ export default function LanguageProvider({ children }: { children: ReactNode }) 
 
   // Charger la langue sauvegardée au montage
   useEffect(() => {
-    const saved = localStorage.getItem('wisbuild-language') as Locale | null;
+    const saved = localStorage.getItem('cheffbuild-language') as Locale | null;
     if (saved && (saved === 'fr' || saved === 'en')) {
       setLocaleState(saved);
       document.documentElement.lang = saved;
@@ -33,7 +33,7 @@ export default function LanguageProvider({ children }: { children: ReactNode }) 
   // Fonction de changement de langue
   const setLocale = (nextLocale: Locale) => {
     setLocaleState(nextLocale);
-    localStorage.setItem('wisbuild-language', nextLocale);
+    localStorage.setItem('cheffbuild-language', nextLocale);
     document.documentElement.lang = nextLocale;
   };
 

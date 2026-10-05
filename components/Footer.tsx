@@ -121,6 +121,14 @@ export default function Footer() {
               <p className="text-gray-300 text-sm leading-relaxed">
                 Notre équipe est à votre écoute pour tous vos projets résidentiels et professionnels.
               </p>
+              <div className="flex flex-col gap-3 mt-5">
+                <Link href="/devis" className="text-center bg-cyan-400 text-[#072660] font-bold py-3 px-4 rounded-lg transition hover:bg-cyan-300">
+                  DEMANDER UN DEVIS
+                </Link>
+                <a href="https://wa.me/237697654023" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 text-center border border-cyan-400 text-cyan-400 font-bold py-3 px-4 rounded-lg transition hover:bg-cyan-400 hover:text-[#072660]">
+                  <FaWhatsapp /> PARLER À UN EXPERT
+                </a>
+              </div>
             </div>
           </div>
         </div>

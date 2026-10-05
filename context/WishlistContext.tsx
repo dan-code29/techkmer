@@ -28,7 +28,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   // Charger depuis localStorage au montage
   useEffect(() => {
-    const saved = localStorage.getItem('wisbuild-wishlist');
+    const saved = localStorage.getItem('cheffbuild-wishlist');
     if (saved) {
       try {
         setItems(JSON.parse(saved));
@@ -42,7 +42,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   // Persister à chaque changement
   useEffect(() => {
     if (hydrated) {
-      localStorage.setItem('wisbuild-wishlist', JSON.stringify(items));
+      localStorage.setItem('cheffbuild-wishlist', JSON.stringify(items));
     }
   }, [items, hydrated]);
 

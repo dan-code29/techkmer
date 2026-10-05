@@ -9,8 +9,7 @@ import Image from 'next/image';
 import { formatPrice } from '@/lib/format';
 import {
   FaBolt, FaSun, FaNetworkWired, FaShieldAlt, FaHome,
-  FaDoorOpen, FaArrowRight, FaWhatsapp, FaPhone,
-  FaEnvelope, FaCog, FaStar, FaQuoteLeft,
+  FaDoorOpen, FaArrowRight, FaCog, FaStar, FaQuoteLeft,
   FaClipboardList, FaSearchDollar, FaTools, FaHeadset,
 } from 'react-icons/fa';
 
@@ -288,7 +287,7 @@ export default function HomePage() {
               One company. <span className="text-[#00C2FF]">Complete solutions.</span>
             </h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
-              Cinq pôles techniques, une seule équipe pour concevoir, installer et maintenir l'ensemble de vos infrastructures.
+              Cinq pôles techniques, une seule équipe pour concevoir, installer et maintenir l&apos;ensemble de vos infrastructures.
             </p>
           </div>
 
@@ -535,40 +534,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================================================================
-          CTA FINAL
-      ================================================================== */}
-      <section className="py-24 bg-gradient-to-br from-[#0066FF] to-[#00C2FF] text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('/images/circuit-pattern.png')] bg-cover" />
-        <div className="relative container mx-auto px-4 text-center max-w-3xl">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            LET'S BUILD SMARTER SPACES.
-          </h2>
-          <p className="text-lg text-white/90 mb-10">
-            De l'énergie à la connectivité, de l'automatisation à la sécurité —
-            CHEFFBUILD conçoit et intègre des solutions techniques complètes.
-          </p>
-
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/devis" className="bg-white text-[#0066FF] font-bold py-4 px-10 rounded-lg transition hover:bg-gray-100 shadow-xl">
-              DEMANDER UN DEVIS
-            </Link>
-            <a href="https://wa.me/237697654023" target="_blank" rel="noreferrer" className="bg-[#050B16] text-white font-bold py-4 px-10 rounded-lg transition hover:bg-black flex items-center gap-2">
-              <FaWhatsapp /> PARLER À UN EXPERT
-            </a>
-          </div>
-
-          <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-white/80">
-            <a href="tel:+237697654023" className="flex items-center gap-2 hover:text-white">
-              <FaPhone /> 697654023
-            </a>
-            <a href="mailto:dancheffo29@gmail.com" className="flex items-center gap-2 hover:text-white">
-              <FaEnvelope /> dancheffo29@gmail.com
-            </a>
-            <span>📍 Yaoundé, Cameroun</span>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
