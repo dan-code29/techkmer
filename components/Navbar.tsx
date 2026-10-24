@@ -510,7 +510,7 @@ export default function Navbar() {
           {/* Logo CHEFFBUILD */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
             <div className="relative w-11 h-11 rounded-xl overflow-hidden bg-gradient-to-br from-[#0066FF] to-[#00C2FF] flex items-center justify-center shadow-lg shadow-[#0066FF]/20 group-hover:shadow-[#00C2FF]/40 transition">
-              <Image src="/images/logo.png" alt="CHEFFBUILD" width={80} height={80} className="object-contain w-full h-full p-0.5" priority />
+              <Image src="/images/logo1.png" alt="CHEFFBUILD" width={500} height={80} className="object-contain w-full h-full p-0.5" priority />
             </div>
             <div className="hidden sm:block">
               <p className="font-bold text-base leading-none text-[#050B16]">CHEFFBUILD</p>

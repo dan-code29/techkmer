@@ -1,283 +1,193 @@
 'use client';
-import { useCart } from '@/context/CartContext';
+
+// ============================================================================
+//  IMPORTS
+// ============================================================================
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { formatPrice } from '@/lib/format';
+import {
+  FaCheckCircle, FaTruck, FaBox, FaHome,
+  FaMapMarkerAlt, FaArrowLeft, FaWhatsapp
+} from 'react-icons/fa';
 
-export default function CheckoutPage() {
-  const { items, totalPrice, clearCart } = useCart();
-  const router = useRouter();
-  
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    deliveryDate: '',
-    paymentMethod: 'delivery', // 'delivery' ou 'online'
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [error, setError] = useState('');
+// ============================================================================
+//  TYPES
+// ============================================================================
+type TrackingStep = {
+  id: number;
+  status: string;
+  title: string;
+  description: string;
+  location: string;
+  created_at: string;
+};
 
-  // Calculer la date minimum (aujourd'hui + 2 jours)
-  const getMinDeliveryDate = () => {
-    const date = new Date();
-    date.setDate(date.getDate() + 2);
-    return date.toISOString().split('T')[0];
-  };
+// Étapes standard pour l'affichage visuel (barre de progression)
+const STEPS = [
+  { key: 'paid', label: 'Commande payée', icon: FaCheckCircle },
+  { key: 'shipped', label: 'Expédiée', icon: FaBox },
+  { key: 'out_for_delivery', label: 'En cours de livraison', icon: FaTruck },
+  { key: 'delivered', label: 'Livrée', icon: FaHome },
+];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+// ============================================================================
+//  COMPOSANT PRINCIPAL
+// ============================================================================
+export default function TrackingPage() {
+  const { id } = useParams();
+  const [history, setHistory] = useState<TrackingStep[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentStatus, setCurrentStatus] = useState('paid');
 
-    // Validations
-    if (!form.name.trim()) {
-      setError('Le nom est requis');
-      return;
-    }
-    if (!form.email.trim()) {
-      setError('L\'email est requis');
-      return;
-    }
-    if (!form.phone.trim()) {
-      setError('Le numéro de téléphone est requis');
-      return;
-    }
-    if (!/^\+?[0-9\s\-()]{8,}$/.test(form.phone)) {
-      setError('Le numéro de téléphone est invalide');
-      return;
-    }
-    if (!form.address.trim()) {
-      setError('L\'adresse est requise');
-      return;
-    }
-    if (!form.deliveryDate) {
-      setError('La date de livraison est requise');
-      return;
-    }
+  useEffect(() => {
+    // On récupère l'historique depuis notre API (créée à l'étape précédente)
+    fetch(`/api/orders/${id}/tracking`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setHistory(data);
+          if (data.length > 0) {
+            setCurrentStatus(data[0].status); // Le plus récent
+          }
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [id]);
 
-    const orderData = {
-      items,
-      totalPrice,
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      address: form.address,
-      deliveryDate: form.deliveryDate,
-      paymentMethod: form.paymentMethod,
-    };
+  // Calcul de l'index pour la barre de progression
+  const currentStepIndex = STEPS.findIndex((s) => s.key === currentStatus);
 
-    if (form.paymentMethod === 'online') {
-      sessionStorage.setItem('orderData', JSON.stringify(orderData));
-      router.push('/commande/paiement');
-      return;
-    }
-
-    setProcessing(true);
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error || 'Erreur lors de la création de la commande');
-      }
-
-      clearCart();
-      setSubmitted(true);
-      router.push(`/commande/confirmation?orderId=${data.id}`);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'enregistrement de la commande');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  if (items.length === 0 && !submitted) {
+  if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4">Votre panier est vide</h1>
-        <Link href="/boutique" className="bg-blue-600 text-white px-6 py-3 rounded-lg">
-          Continuer vos achats
-        </Link>
-      </div>
-    );
-  }
-
-  if (submitted) {
-    return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <h1 className="text-2xl font-bold mb-4 text-green-600">✅ Commande confirmée !</h1>
-        <p className="mb-4">Votre commande a été reçue et sera livrée le <strong>{new Date(form.deliveryDate).toLocaleDateString('fr-FR')}</strong>.</p>
-        <p className="mb-6 text-gray-600">Nous vous contacterons au <strong>{form.phone}</strong> pour confirmer les détails.</p>
-        <Link href="/boutique" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-          Retour à la boutique
-        </Link>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-[#0066FF] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-gray-500 mt-4">Chargement du suivi...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">Finaliser la commande</h1>
-      
-      {/* Récapitulatif du panier */}
-      <div className="bg-gray-100 p-4 rounded mb-8">
-        <h2 className="font-semibold mb-4">Récapitulatif du panier</h2>
-        {items.map((item) => (
-          <div key={item.id} className="flex justify-between mb-2">
-            <span>{item.name} x {item.quantity}</span>
-            <span>{formatPrice(item.price * item.quantity)}</span>
-          </div>
-        ))}
-        <div className="border-t mt-4 pt-2 font-bold text-lg flex justify-between">
-          <span>Total</span>
-          <span className="text-green-600">{formatPrice(totalPrice)}</span>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header Mobile-first */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/commande/confirmation" className="text-gray-600 hover:text-[#0066FF]">
+            <FaArrowLeft size={20} />
+          </Link>
+          <h1 className="font-bold text-lg text-[#050B16]">Suivi de commande</h1>
+          <div className="w-5" /> {/* Spacer pour centrer le titre */}
         </div>
       </div>
 
-      {/* Formulaire */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        
+        {/* Carte Info Commande */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Commande</span>
+            <span className="text-xs font-bold text-[#0066FF] bg-blue-50 px-2 py-1 rounded">#{id}</span>
           </div>
-        )}
+          <h2 className="text-2xl font-bold text-[#050B16]">
+            {currentStatus === 'delivered' ? 'Commande livrée' : 'Livraison en cours'}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Merci pour votre confiance CHEFFBUILD.</p>
+        </div>
 
-        {/* Informations personnelles */}
-        <div className="border-b pb-6">
-          <h2 className="text-xl font-semibold mb-4">Informations personnelles</h2>
+        {/* Barre de progression visuelle */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+          <div className="relative flex justify-between">
+            {/* Ligne de fond */}
+            <div className="absolute top-5 left-0 w-full h-1 bg-gray-200 -z-10" />
+            {/* Ligne de progression active */}
+            <div
+              className="absolute top-5 left-0 h-1 bg-[#0066FF] -z-10 transition-all duration-500"
+              style={{ width: `${currentStepIndex >= 0 ? (currentStepIndex / (STEPS.length - 1)) * 100 : 0}%` }}
+            />
+
+            {STEPS.map((step, index) => {
+              const isActive = index <= currentStepIndex;
+              const Icon = step.icon;
+              return (
+                <div key={step.key} className="flex flex-col items-center gap-2 bg-white px-2">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                    isActive ? 'bg-[#0066FF] text-white' : 'bg-gray-100 text-gray-400'
+                  }`}>
+                    <Icon size={16} />
+                  </div>
+                  <span className={`text-[10px] font-bold text-center max-w-[60px] leading-tight ${
+                    isActive ? 'text-[#050B16]' : 'text-gray-400'
+                  }`}>
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Historique détaillé (Timeline) */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <h3 className="font-bold text-[#050B16] mb-6">Historique de livraison</h3>
           
-          <div className="grid md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block font-medium mb-1">Nom complet *</label>
-              <input
-                type="text"
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full border rounded p-2"
-                placeholder="Jean Dupont"
-              />
+          {history.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-4">Aucun événement enregistré pour le moment.</p>
+          ) : (
+            <div className="space-y-6">
+              {history.map((event, index) => {
+                const date = new Date(event.created_at);
+                return (
+                  <div key={event.id} className="flex gap-4 relative">
+                    {/* Ligne verticale entre les points */}
+                    {index !== history.length - 1 && (
+                      <div className="absolute left-2.5 top-8 bottom-0 w-0.5 bg-gray-100" />
+                    )}
+                    
+                    {/* Point */}
+                    <div className={`w-5 h-5 rounded-full flex-shrink-0 mt-1 z-10 ${
+                      index === 0 ? 'bg-[#00C2FF] ring-4 ring-[#00C2FF]/20' : 'bg-gray-300'
+                    }`} />
+
+                    {/* Contenu */}
+                    <div className="flex-1 pb-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className={`font-bold text-sm ${index === 0 ? 'text-[#0066FF]' : 'text-[#050B16]'}`}>
+                          {event.title}
+                        </h4>
+                        <span className="text-[10px] text-gray-400 whitespace-nowrap">
+                          {date.toLocaleDateString('fr-FR')} à {date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{event.description}</p>
+                      {event.location && (
+                        <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                          <FaMapMarkerAlt size={10} /> {event.location}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div>
-              <label className="block font-medium mb-1">Email *</label>
-              <input
-                type="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border rounded p-2"
-                placeholder="jean@example.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">Numéro de téléphone *</label>
-            <input
-              type="tel"
-              required
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full border rounded p-2"
-              placeholder="+221 77 123 45 67 ou 77 123 45 67"
-            />
-            <p className="text-sm text-gray-500 mt-1">Format: +221 77 123 45 67 ou 77 123 45 67</p>
-          </div>
+          )}
         </div>
 
-        {/* Adresse de livraison */}
-        <div className="border-b pb-6">
-          <h2 className="text-xl font-semibold mb-4">Adresse de livraison</h2>
-          <div>
-            <label className="block font-medium mb-1">Adresse complète *</label>
-            <textarea
-              required
-              rows={3}
-              value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className="w-full border rounded p-2"
-              placeholder="Rue, numéro, quartier, ville..."
-            />
-          </div>
-        </div>
-
-        {/* Date de livraison */}
-        <div className="border-b pb-6">
-          <h2 className="text-xl font-semibold mb-4">Date de livraison</h2>
-          <div>
-            <label className="block font-medium mb-1">Choisir un jour de livraison *</label>
-            <input
-              type="date"
-              required
-              min={getMinDeliveryDate()}
-              value={form.deliveryDate}
-              onChange={(e) => setForm({ ...form, deliveryDate: e.target.value })}
-              className="w-full border rounded p-2"
-            />
-            <p className="text-sm text-gray-500 mt-1">Minimum 2 jours après aujourd'hui</p>
-          </div>
-        </div>
-
-        {/* Mode de paiement */}
-        <div className="border-b pb-6">
-          <h2 className="text-xl font-semibold mb-4">Mode de paiement</h2>
-          <div className="space-y-3">
-            <label className="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50" style={{borderColor: form.paymentMethod === 'delivery' ? '#059669' : '#d1d5db'}}>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="delivery"
-                checked={form.paymentMethod === 'delivery'}
-                onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-                className="w-4 h-4 mr-3"
-              />
-              <div>
-                <p className="font-semibold">Paiement à la livraison</p>
-                <p className="text-sm text-gray-600">Payez lorsque vous recevez votre commande</p>
-              </div>
-            </label>
-
-            <label className="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50" style={{borderColor: form.paymentMethod === 'online' ? '#059669' : '#d1d5db'}}>
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="online"
-                checked={form.paymentMethod === 'online'}
-                onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
-                className="w-4 h-4 mr-3"
-              />
-              <div>
-                <p className="font-semibold">Paiement en ligne</p>
-                <p className="text-sm text-gray-600">Orange Money, MTN Mobile Money ou Carte bancaire</p>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        {/* Boutons */}
-        <div className="flex gap-4">
-          <button 
-            type="submit" 
-            disabled={processing}
-            className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold transition"
+        {/* Besoin d'aide */}
+        <div className="mt-8 text-center">
+          <a
+            href={`https://wa.me/237697654023?text=Bonjour, je souhaite avoir des informations sur ma commande %23${id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-bold text-green-600 hover:underline"
           >
-            {processing ? 'Enregistrement en cours...' : form.paymentMethod === 'online' ? 'Procéder au paiement' : 'Confirmer la commande'}
-          </button>
-          <Link 
-            href="/panier" 
-            className="px-6 py-3 border rounded-lg hover:bg-gray-50 transition font-semibold"
-          >
-            Retour au panier
-          </Link>
+            <FaWhatsapp size={16} /> Besoin d'aide avec cette commande ?
+          </a>
         </div>
-      </form>
+
+      </div>
     </div>
   );
 }
