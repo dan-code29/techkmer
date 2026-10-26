@@ -1,144 +1,214 @@
 import Link from 'next/link';
-import { 
-  FaWhatsapp, 
-  FaTelegramPlane, 
-  FaNetworkWired, 
-  FaShieldAlt, 
-  FaWrench,
-  FaHome,
-  FaVideo
-} from 'react-icons/fa';
-import { 
-  MdEmail, 
-  MdPhone, 
-  MdElectricBolt, 
-  MdSecurity,
-} from 'react-icons/md';
-import { FiZap } from 'react-icons/fi';
+import Image from 'next/image';
+import { FaWhatsapp, FaTelegramPlane } from 'react-icons/fa';
+import { MdEmail, MdPhone } from 'react-icons/md';
+
+const QUICK_LINKS = [
+  { href: '/services', label: 'Services' },
+  { href: '/boutique', label: 'Boutique' },
+  { href: '/care', label: 'CHEFFBUILD CARE' },
+  { href: '/realisations', label: 'Réalisations' },
+  { href: '/about', label: 'À propos' },
+  { href: '/contact', label: 'Contact' },
+];
 
 export default function Footer() {
   return (
-    <footer className="relative text-white mt-20 border-t border-cyan-500/20 overflow-hidden bg-[url('/images/backgroundfooter.png')] bg-cover bg-center">
-      {/* Effets de fond */}
-      <div className="absolute inset-0 opacity-30 bg-[#072660]"></div>
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,#00BFFF,transparent_35%)]"></div>
-      <div className="absolute inset-0 opacity-5 bg-[url('/images/circuit-pattern.png')] bg-cover bg-center"></div>
+    <footer className="relative mt-12 overflow-hidden border-t border-cyan-500/20 bg-[url('/images/backgroundfooter.png')] bg-cover bg-center text-white">
+      {/* ============ EFFETS DE FOND (restaurés) ============ */}
+      <div className="absolute inset-0 bg-[#072660] opacity-30" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#00BFFF,transparent_35%)] opacity-10" />
+      <div className="absolute inset-0 bg-[url('/images/circuit-pattern.png')] bg-cover bg-center opacity-5" />
 
-      <div className="relative max-w-7xl mx-auto px-6 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Colonne 1 */}
+      <div className="relative mx-auto max-w-7xl px-6 py-8">
+        <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* ============ Colonne 1 — Logo + Brand ============ */}
           <div>
-            <h3 className="text-3xl font-bold tracking-wide mb-4">
-              <span className="text-white">CHEFFBUILD</span>
-              <span className="text-cyan-400"> Smart Systems</span>
-            </h3>
-            <p className="text-cyan-400 font-semibold tracking-wider mb-4">
-              Connecter • Éclairer • Protéger
+            <Link href="/" className="mb-2 flex items-center gap-2.5">
+              {/* --- SOLUTION 1 : Badge CB (fonctionne tout de suite) --- */}
+             
+
+              {
+              <Image
+                src="/images/logo1.png"
+                alt="CHEFFBUILD Logo"
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0 rounded-lg object-contain"
+              />
+              }
+
+              <div>
+                <div className="text-base font-bold leading-tight">
+                  <span className="text-white">CHEFFBUILD</span>
+                </div>
+                <div className="text-[11px] font-semibold text-cyan-400">
+                  Smart Systems
+                </div>
+              </div>
+            </Link>
+
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-cyan-400">
+              Connecter • Sécuriser • Automatiser
             </p>
-            <p className="text-gray-300 leading-relaxed text-sm">
-              CHEFFBUILD Smart Systems conçoit, installe et maintient des solutions électriques,
-              solaires, réseau, de sécurité électronique et de domotique au Cameroun.
+            <p className="mb-3 text-xs leading-relaxed text-gray-300">
+              Intégrateur camerounais de solutions techniques du bâtiment : électricité,
+              solaire, réseau, sécurité, domotique et automatisation.
             </p>
-            {/* Services Icons avec react-icons */}
-            <div className="grid grid-cols-3 gap-4 mt-8 text-center text-xs">
-              <div className="flex flex-col items-center gap-2">
-                <FaNetworkWired className="text-cyan-400" size={26} />
-                <span>Réseau</span>
+
+            {/* Réseaux sociaux compacts */}
+            <div className="flex items-center gap-2">
+              <a
+                href="https://wa.me/237697654023"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-500/30 bg-white/5 text-cyan-400 transition hover:-translate-y-0.5 hover:bg-cyan-400 hover:text-[#072660]"
+              >
+                <FaWhatsapp size={13} />
+              </a>
+              <a
+                href="https://t.me/Dan_Cheff"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Telegram"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-500/30 bg-white/5 text-cyan-400 transition hover:-translate-y-0.5 hover:bg-cyan-400 hover:text-[#072660]"
+              >
+                <FaTelegramPlane size={13} />
+              </a>
+              <a
+                href="mailto:dancheffo29@gmail.com"
+                aria-label="Email"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-500/30 bg-white/5 text-cyan-400 transition hover:-translate-y-0.5 hover:bg-cyan-400 hover:text-[#072660]"
+              >
+                <MdEmail size={13} />
+              </a>
+              <a
+                href="tel:+237697654023"
+                aria-label="Téléphone"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-cyan-500/30 bg-white/5 text-cyan-400 transition hover:-translate-y-0.5 hover:bg-cyan-400 hover:text-[#072660]"
+              >
+                <MdPhone size={13} />
+              </a>
+            </div>
+          </div>
+
+          {/* ============ Colonne 2 — Liens rapides ============ */}
+          <div>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+              Liens rapides
+            </h4>
+            <ul className="space-y-1.5 text-xs">
+              {QUICK_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-gray-300 transition hover:text-cyan-400"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ============ Colonne 3 — QR Codes centrés ============ */}
+          <div>
+            <h4 className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-cyan-400">
+              Scanner & connecter
+            </h4>
+
+            <div className="flex justify-center gap-3">
+              <div className="flex flex-col items-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-md bg-white p-1 shadow-md">
+                  <Image
+                    src="/images/qr/contact.jpg"
+                    alt="QR code contact CHEFFBUILD"
+                    width={72}
+                    height={72}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+                <p className="mt-1.5 text-center text-[10px] leading-tight text-gray-400">
+                  Contact
+                </p>
               </div>
-              <div className="flex flex-col items-center gap-2">
-                <MdElectricBolt className="text-yellow-400" size={26} />
-                <span>Électricité</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <FaHome className="text-cyan-400" size={26} />
-                <span>Domotique</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <FaShieldAlt className="text-cyan-400" size={26} />
-                <span>Sécurité</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <FaVideo className="text-cyan-400" size={26} />
-                <span>Contrôle d&apos;accès</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <FaWrench className="text-cyan-400" size={26} />
-                <span>Maintenance</span>
+
+              <div className="flex flex-col items-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-md bg-white p-1 shadow-md">
+                  <Image
+                    src="/images/qr/portfolio.jpg"
+                    alt="QR code portfolio CHEFFBUILD"
+                    width={72}
+                    height={72}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+                <p className="mt-1.5 text-center text-[10px] leading-tight text-gray-400">
+                  Portfolio
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Colonne 2 */}
+          {/* ============ Colonne 4 — Contact + CTA ============ */}
           <div>
-            <h4 className="text-xl font-semibold mb-6 text-cyan-400">Liens rapides</h4>
-            <ul className="space-y-3">
-              <li><Link href="/services" className="text-gray-300 hover:text-cyan-400 transition">Services</Link></li>
-              <li><Link href="/maintenance" className="text-gray-300 hover:text-cyan-400 transition">Maintenance</Link></li>
-              <li><Link href="/boutique" className="text-gray-300 hover:text-cyan-400 transition">Boutique</Link></li>
-              <li><Link href="/devis" className="text-gray-300 hover:text-cyan-400 transition">Devis</Link></li>
-              <li><Link href="/about" className="text-gray-300 hover:text-cyan-400 transition">À propos</Link></li>
-              <li><Link href="/contact" className="text-gray-300 hover:text-cyan-400 transition">Contact</Link></li>
-            </ul>
-          </div>
-
-          {/* Colonne 3 */}
-          <div>
-            <h4 className="text-xl font-semibold mb-6 text-cyan-400">Nos Expertises</h4>
-            <ul className="space-y-4 text-gray-300 text-sm">
-              <li><FiZap className="inline mr-2" /> Électricité générale</li>
-              <li><FaNetworkWired className="inline mr-2" /> Réseaux informatiques</li>
-              <li><FaHome className="inline mr-2" /> Domotique & Smart Home</li>
-              <li><MdSecurity className="inline mr-2" /> Sécurité électronique, alarmes &amp; contrôle d&apos;accès</li>
-              <li><FaVideo className="inline mr-2" /> Vidéosurveillance</li>
-              <li>🚪 Motorisation de portail</li>
-              <li>🔐 Contrôle d’accès</li>
-            </ul>
-          </div>
-
-          {/* Colonne 4 */}
-          <div>
-            <h4 className="text-xl font-semibold mb-6 text-cyan-400">Contact</h4>
-            <div className="space-y-5 text-gray-300 text-sm">
-              <div className="flex items-center gap-3">
-                <MdEmail className="text-cyan-400" size={20} />
-                <a href="mailto:dancheffo29@gmail.com" className="hover:text-cyan-400 transition">dancheffo29@gmail.com</a>
-              </div>
-              <div className="flex items-center gap-3">
-                <MdPhone className="text-cyan-400" size={20} />
-                <a href="tel:+237697654023" className="hover:text-cyan-400 transition">697654023</a>
-              </div>
-              <div className="flex items-center gap-3">
-                <FaTelegramPlane className="text-cyan-400" size={20} />
-                <a href="https://t.me/Dan_Cheff" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition">Telegram</a>
-              </div>
-              <div className="flex items-center gap-3">
-                <FaWhatsapp className="text-green-400" size={20} />
-                <a href="https://wa.me/237697654023" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition">WhatsApp</a>
-              </div>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+              Contact
+            </h4>
+            <div className="space-y-2 text-xs">
+              <a
+                href="tel:+237697654023"
+                className="flex items-center gap-2 text-gray-300 transition hover:text-cyan-400"
+              >
+                <MdPhone size={14} className="shrink-0 text-cyan-400" />
+                +237 697 654 023
+              </a>
+              <a
+                href="mailto:dancheffo29@gmail.com"
+                className="flex items-center gap-2 text-gray-300 transition hover:text-cyan-400"
+              >
+                <MdEmail size={14} className="shrink-0 text-cyan-400" />
+                dancheffo29@gmail.com
+              </a>
+              <a
+                href="https://wa.me/237697654023"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-300 transition hover:text-green-400"
+              >
+                <FaWhatsapp size={14} className="shrink-0 text-green-400" />
+                WhatsApp
+              </a>
             </div>
-            <div className="mt-8 p-5 rounded-2xl border border-cyan-500/20 bg-white/5 backdrop-blur-sm">
-              <h5 className="font-semibold text-cyan-400 mb-2">Besoin d’un accompagnement ?</h5>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                Notre équipe est à votre écoute pour tous vos projets résidentiels et professionnels.
-              </p>
-              <div className="flex flex-col gap-3 mt-5">
-                <Link href="/devis" className="text-center bg-cyan-400 text-[#072660] font-bold py-3 px-4 rounded-lg transition hover:bg-cyan-300">
-                  DEMANDER UN DEVIS
-                </Link>
-                <a href="https://wa.me/237697654023" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 text-center border border-cyan-400 text-cyan-400 font-bold py-3 px-4 rounded-lg transition hover:bg-cyan-400 hover:text-[#072660]">
-                  <FaWhatsapp /> PARLER À UN EXPERT
-                </a>
-              </div>
+
+            <div className="mt-3 space-y-1.5">
+              <Link
+                href="/devis"
+                className="block rounded-md bg-cyan-400 px-3 py-2 text-center text-[11px] font-bold text-[#072660] transition hover:bg-cyan-300"
+              >
+                DEMANDER UN DEVIS
+              </Link>
+              <Link
+                href="/configurateur"
+                className="block rounded-md border border-cyan-400/60 px-3 py-2 text-center text-[11px] font-semibold text-cyan-400 transition hover:bg-cyan-400 hover:text-[#072660]"
+              >
+                CONFIGURER MON PROJET
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-white/10 mt-14 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+        {/* ============ Bottom bar ============ */}
+        <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-white/10 pt-4 text-[11px] text-gray-400 md:flex-row">
           <p>© {new Date().getFullYear()} CHEFFBUILD Smart Systems. Tous droits réservés.</p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-cyan-400 transition">Politique de confidentialité</Link>
-            <Link href="/mentions" className="hover:text-cyan-400 transition">Mentions légales</Link>
+          <div className="flex gap-4">
+            <Link href="/privacy" className="transition hover:text-cyan-400">
+              Confidentialité
+            </Link>
+            <Link href="/mentions" className="transition hover:text-cyan-400">
+              Mentions légales
+            </Link>
           </div>
         </div>
       </div>
