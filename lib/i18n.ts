@@ -107,7 +107,7 @@ const translations = {
     // ---- À propos ----
     aboutTitle: 'À propos de CHEFFBUILD Smart Systems',
     mission: 'Notre mission',
-    poles: 'Nos quatre pôles',
+    poles: 'Nos  pôles',
     values: 'Nos valeurs',
 
     // ---- Langue ----
