@@ -1,5 +1,8 @@
 'use client';
 
+/* ================================================================== */
+/*  IMPORTS                                                            */
+/* ================================================================== */
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -7,11 +10,13 @@ import {
   FaShieldAlt, FaSun, FaNetworkWired, FaHome, FaBolt, FaCog, FaTools,
   FaArrowRight, FaMapMarkerAlt, FaCalendarAlt, FaTimes, FaCheckCircle,
   FaChevronLeft, FaChevronRight, FaPause, FaPlay,
+  FaExternalLinkAlt, // ← NOUVEAU : icône pour le bouton "Voir la fiche"
 } from 'react-icons/fa';
 
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
 /*  TYPES                                                              */
-/* ------------------------------------------------------------------ */
+/*  (exportés pour être réutilisés ailleurs dans l'app)                */
+/* ================================================================== */
 export type ProjectCategory =
   | 'securite'
   | 'solaire'
@@ -25,11 +30,11 @@ export type Project = {
   id: number;
   title: string;
   category: ProjectCategory;
-  date: string;            // 'YYYY-MM' → pour tri précis
-  year: string;            // 'YYYY' → pour affichage
+  date: string;            // Format 'YYYY-MM' → permet un tri précis au mois
+  year: string;            // Format 'YYYY' → pour l'affichage
   location: string;
   client: string;
-  images: string[];
+  images: string[];        // Tableau d'images → permet le carrousel multi-photos
   shortDesc: string;
   challenge: string;
   solution: string;
@@ -37,16 +42,18 @@ export type Project = {
   features: string[];
 };
 
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
 /*  STYLES PAR CATÉGORIE                                               */
-/* ------------------------------------------------------------------ */
+/*  Chaque catégorie a sa couleur (bordure / badge / filtre actif)     */
+/*  → Permet d'identifier visuellement chaque groupe d'un coup d'œil   */
+/* ================================================================== */
 const CATEGORY_STYLES: Record<
   ProjectCategory,
   {
-    border: string;
-    badge: string;
-    filterActive: string;
-    dot: string;
+    border: string;        // Classes pour la bordure de la card
+    badge: string;         // Classes pour le badge de catégorie
+    filterActive: string;  // Classes pour le bouton filtre actif
+    dot: string;           // (Réservé pour futurs usages)
   }
 > = {
   securite: {
@@ -93,9 +100,9 @@ const CATEGORY_STYLES: Record<
   },
 };
 
-/* ------------------------------------------------------------------ */
-/*  CATÉGORIES                                                         */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/*  CATÉGORIES (utilisées pour les boutons filtres en haut)            */
+/* ================================================================== */
 const CATEGORIES = [
   { id: 'all', label: 'Tous les projets', icon: null },
   { id: 'securite', label: 'Sécurité', icon: FaShieldAlt },
@@ -107,11 +114,13 @@ const CATEGORIES = [
   { id: 'maintenance', label: 'Maintenance', icon: FaTools },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  DONNÉES                                                            */
-/*  ⚠️ Le champ `date` est en 'YYYY-MM' (ex. '2025-11' = novembre 2025) */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/*  DONNÉES DES PROJETS                                                */
+/*  ⚠️ Chaque projet a 3 images (la 1re = la couverture)                */
+/*  ⚠️ Le champ `date` en 'YYYY-MM' permet un tri décroissant précis    */
+/* ================================================================== */
 export const PROJECTS: Project[] = [
+  /* ---------------- 1. VIDÉOSURVEILLANCE ---------------- */
   {
     id: 1,
     title: 'Vidéosurveillance commerciale — Centre commercial',
@@ -127,6 +136,7 @@ export const PROJECTS: Project[] = [
     result: 'Couverture 100% du site, temps de recherche réduit de 80%, aucune interruption depuis la mise en service.',
     features: ['48 caméras IP 4K', 'NVR redondant', 'Stockage 30 jours', 'Accès mobile'],
   },
+  /* ---------------- 2. SOLAIRE ---------------- */
   {
     id: 2,
     title: 'Installation solaire résidentielle 5 kWc',
@@ -142,6 +152,7 @@ export const PROJECTS: Project[] = [
     result: 'Autonomie complète 8h/jour, facture Eneo réduite de 75%, zéro coupure depuis l’installation.',
     features: ['12 panneaux 450 Wc', 'Onduleur hybride 5 kVA', 'Batteries lithium 20 kWh', 'Monitoring mobile'],
   },
+  /* ---------------- 3. RÉSEAU ---------------- */
   {
     id: 3,
     title: 'Infrastructure réseau entreprise 200 postes',
@@ -157,6 +168,7 @@ export const PROJECTS: Project[] = [
     result: 'Débit multiplié par 10, disponibilité 99,9%, documentation complète livrée.',
     features: ['320 points RJ45', '4 baies de brassage', 'Wi-Fi 6', 'VLAN segmentés'],
   },
+  /* ---------------- 4. DOMOTIQUE ---------------- */
   {
     id: 4,
     title: 'Maison connectée — Villa 400 m²',
@@ -172,6 +184,7 @@ export const PROJECTS: Project[] = [
     result: 'Confort optimal, économie d’énergie 30%, contrôle total depuis smartphone.',
     features: ['45 modules domotiques', 'Scénarios automatiques', 'Économie 30%', 'App mobile'],
   },
+  /* ---------------- 5. ÉLECTRICITÉ ---------------- */
   {
     id: 5,
     title: 'Tableau électrique et mise aux normes',
@@ -187,6 +200,7 @@ export const PROJECTS: Project[] = [
     result: 'Conformité totale, protection optimale, zéro incident électrique depuis.',
     features: ['Tableau neuf', 'Différentiels 30 mA', 'Parafoudre Type 2', 'Mise à la terre'],
   },
+  /* ---------------- 6. AUTOMATISATION ---------------- */
   {
     id: 6,
     title: 'Portail automatique coulissant 6 m',
@@ -202,6 +216,7 @@ export const PROJECTS: Project[] = [
     result: 'Confort maximal, sécurité renforcée, ouverture depuis le bureau ou smartphone.',
     features: ['Moteur 800 kg', 'Cellule sécurité', 'Interphone vidéo', 'Ouverture distante'],
   },
+  /* ---------------- 7. SÉCURITÉ (2e) ---------------- */
   {
     id: 7,
     title: 'Contrôle d’accès — Siège social',
@@ -217,6 +232,7 @@ export const PROJECTS: Project[] = [
     result: 'Traçabilité complète, gestion centralisée, incidents réduits à zéro.',
     features: ['Biométrie + badge', '6 portes', 'Traçabilité', 'Intégration CCTV'],
   },
+  /* ---------------- 8. ÉLECTRICITÉ (2e) ---------------- */
   {
     id: 8,
     title: 'Éclairage LED industriel — Entrepôt 3000 m²',
@@ -232,6 +248,7 @@ export const PROJECTS: Project[] = [
     result: 'Économie d’énergie 60%, luminosité améliorée 3x, maintenance réduite.',
     features: ['200 LED IP65', 'Détecteurs présence', 'Économie 60%', 'Gradation auto'],
   },
+  /* ---------------- 9. MAINTENANCE ---------------- */
   {
     id: 9,
     title: 'Contrat de maintenance préventive — Résidence R+2',
@@ -247,6 +264,7 @@ export const PROJECTS: Project[] = [
     result: 'Zéro panne majeure sur 12 mois, durée de vie des équipements prolongée, budget maintenance maîtrisé.',
     features: ['4 visites/an', 'Intervention 24h', 'Registre numérique', 'Pièces en stock'],
   },
+  /* ---------------- 10. MAINTENANCE (2e) ---------------- */
   {
     id: 10,
     title: 'Dépannage urgent — Remise en service alarme & CCTV',
@@ -264,10 +282,11 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
 /*  COMPOSANT PRINCIPAL                                                */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
 export default function Realisations() {
+  /* ---------- ÉTATS ---------- */
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -275,25 +294,25 @@ export default function Realisations() {
 
   /* ---------- FILTRAGE + TRI PAR DATE (plus récent en haut) ---------- */
   const filtered = useMemo(() => {
-    // 1. Filtrer
+    // 1. Filtrer selon la catégorie active
     const list =
       activeCategory === 'all'
         ? PROJECTS
         : PROJECTS.filter((p) => p.category === activeCategory);
 
-    // 2. Trier par date décroissante (YYYY-MM)
-    //    b.date.localeCompare(a.date) → 2025-11 avant 2025-10 avant 2024-12…
+    // 2. Trier par date décroissante (le plus récent en premier)
+    //    On copie le tableau ([...list]) car .sort() mute l'original
     return [...list].sort((a, b) => b.date.localeCompare(a.date));
   }, [activeCategory]);
 
-  /* ---------- OUVERTURE MODAL ---------- */
+  /* ---------- OUVERTURE DE LA MODAL ---------- */
   const openProject = (p: Project) => {
     setSelectedProject(p);
     setCurrentImageIndex(0);
     setAutoPlay(true);
   };
 
-  /* ---------- NAVIGATION IMAGES ---------- */
+  /* ---------- NAVIGATION DANS LE CARROUSEL ---------- */
   const nextImage = useCallback(() => {
     if (!selectedProject) return;
     setCurrentImageIndex((prev) => (prev + 1) % selectedProject.images.length);
@@ -306,16 +325,16 @@ export default function Realisations() {
     );
   }, [selectedProject]);
 
-  /* ---------- AUTO-PLAY ---------- */
+  /* ---------- AUTO-PLAY DU CARROUSEL ---------- */
   useEffect(() => {
     if (!selectedProject || !autoPlay) return;
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % selectedProject.images.length);
-    }, 4000);
+    }, 4000); // Toutes les 4 secondes
     return () => clearInterval(interval);
   }, [selectedProject, autoPlay]);
 
-  /* ---------- CLAVIER ---------- */
+  /* ---------- NAVIGATION CLAVIER (← → Échap) ---------- */
   useEffect(() => {
     if (!selectedProject) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -327,21 +346,20 @@ export default function Realisations() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [selectedProject, nextImage, prevImage]);
 
-  /* ---------- BLOCAGE SCROLL ---------- */
+  /* ---------- BLOCAGE DU SCROLL QUAND LA MODAL EST OUVERTE ---------- */
   useEffect(() => {
-    if (selectedProject) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = selectedProject ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
   }, [selectedProject]);
 
+  /* ================================================================ */
+  /*  RENDU                                                           */
+  /* ================================================================ */
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#EAF3FF] via-[#DCEBFF] to-[#E6FBFF]">
-      {/* ============ FOND DYNAMIQUE ============ */}
+      {/* ============ FOND DYNAMIQUE (blobs + grille) ============ */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <div className="animate-blob absolute -top-40 -right-32 h-[500px] w-[500px] rounded-full bg-[#0066FF]/20 blur-3xl" />
         <div className="animate-blob animation-delay-2000 absolute top-1/3 -left-40 h-[420px] w-[420px] rounded-full bg-[#00C2FF]/20 blur-3xl" />
@@ -398,7 +416,7 @@ export default function Realisations() {
         </div>
       </section>
 
-      {/* ============ FILTRES ============ */}
+      {/* ============ FILTRES STICKY ============ */}
       <section className="sticky top-0 z-30 border-b border-white/60 bg-white/70 shadow-sm backdrop-blur-md">
         <div className="container mx-auto overflow-x-auto px-4 py-4">
           <div className="flex gap-2 whitespace-nowrap">
@@ -431,7 +449,7 @@ export default function Realisations() {
         </div>
       </section>
 
-      {/* ============ GRILLE ============ */}
+      {/* ============ GRILLE DES PROJETS ============ */}
       <section className="relative z-10 py-16">
         <div className="container mx-auto px-4">
           {filtered.length === 0 ? (
@@ -470,14 +488,17 @@ export default function Realisations() {
                         {catInfo?.label}
                       </span>
 
+                      {/* Badge année */}
                       <span className="absolute right-3 top-3 rounded bg-black/60 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
                         {p.year}
                       </span>
 
+                      {/* Badge nombre de photos */}
                       <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
                         📷 {p.images.length}
                       </span>
 
+                      {/* Titre en bas de l'image */}
                       <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                         <p className="line-clamp-2 text-base font-bold leading-tight">
                           {p.title}
@@ -509,7 +530,7 @@ export default function Realisations() {
         </div>
       </section>
 
-      {/* ============ CTA ============ */}
+      {/* ============ CTA FINAL ============ */}
       <section className="relative z-10 py-20">
         <div className="container mx-auto max-w-3xl px-4">
           <div className="rounded-3xl border border-white/70 bg-gradient-to-br from-[#0066FF] to-[#00C2FF] p-10 text-center text-white shadow-xl shadow-[#0066FF]/20 md:p-14">
@@ -529,7 +550,9 @@ export default function Realisations() {
         </div>
       </section>
 
-      {/* ============ MODAL DÉTAIL + GALERIE ============ */}
+      {/* ============================================================ */}
+      {/*  MODAL DÉTAIL + CARROUSEL                                   */}
+      {/* ============================================================ */}
       {selectedProject && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
@@ -539,7 +562,7 @@ export default function Realisations() {
             className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Carrousel */}
+            {/* -------- CARROUSEL D'IMAGES -------- */}
             <div
               className="group/carousel relative h-72 md:h-96"
               onMouseEnter={() => setAutoPlay(false)}
@@ -554,6 +577,7 @@ export default function Realisations() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
+              {/* Bouton fermer */}
               <button
                 onClick={() => setSelectedProject(null)}
                 className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg transition hover:bg-white"
@@ -579,6 +603,7 @@ export default function Realisations() {
                 })()}
               </div>
 
+              {/* Flèche précédente */}
               <button
                 onClick={prevImage}
                 className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg transition hover:bg-white md:opacity-0 md:group-hover/carousel:opacity-100"
@@ -587,6 +612,7 @@ export default function Realisations() {
                 <FaChevronLeft size={14} />
               </button>
 
+              {/* Flèche suivante */}
               <button
                 onClick={nextImage}
                 className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-800 shadow-lg transition hover:bg-white md:opacity-0 md:group-hover/carousel:opacity-100"
@@ -595,6 +621,7 @@ export default function Realisations() {
                 <FaChevronRight size={14} />
               </button>
 
+              {/* Compteur + bouton pause/play */}
               <div className="absolute bottom-20 right-4 z-20 flex items-center gap-2">
                 <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                   {currentImageIndex + 1} / {selectedProject.images.length}
@@ -608,6 +635,7 @@ export default function Realisations() {
                 </button>
               </div>
 
+              {/* Titre + infos projet */}
               <div className="absolute bottom-0 left-0 right-0 z-10 p-6 text-white">
                 <h2 className="text-2xl font-bold leading-tight md:text-3xl">
                   {selectedProject.title}
@@ -623,6 +651,7 @@ export default function Realisations() {
                 </div>
               </div>
 
+              {/* Dots indicateurs */}
               <div className="absolute bottom-3 left-0 right-0 z-20 flex justify-center gap-1.5">
                 {selectedProject.images.map((_, idx) => (
                   <button
@@ -639,8 +668,9 @@ export default function Realisations() {
               </div>
             </div>
 
-            {/* Contenu détail */}
+            {/* -------- CONTENU DÉTAIL -------- */}
             <div className="space-y-6 p-6 md:p-8">
+              {/* Aperçu */}
               <div>
                 <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-[#0066FF]">
                   Aperçu
@@ -648,6 +678,7 @@ export default function Realisations() {
                 <p className="leading-relaxed text-gray-700">{selectedProject.shortDesc}</p>
               </div>
 
+              {/* Défi + Solution */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-xl border border-red-100 bg-red-50 p-5">
                   <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-red-600">
@@ -667,6 +698,7 @@ export default function Realisations() {
                 </div>
               </div>
 
+              {/* Résultat */}
               <div className="rounded-xl border border-green-100 bg-green-50 p-5">
                 <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-green-700">
                   ✅ Résultat
@@ -676,6 +708,7 @@ export default function Realisations() {
                 </p>
               </div>
 
+              {/* Points clés */}
               <div>
                 <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-[#0066FF]">
                   Points clés du projet
@@ -693,12 +726,28 @@ export default function Realisations() {
                 </div>
               </div>
 
-              <div className="border-t pt-4">
+              {/* ============================================================ */}
+              {/*  ⭐ ZONE MODIFIÉE (Option D) ⭐                              */}
+              {/*  Ajout d'un bouton "Voir la fiche complète" à côté du bouton  */}
+              {/*  "Demander un devis". Le 1er est primaire (navigation),      */}
+              {/*  le 2e est secondaire (conversion).                          */}
+              {/* ============================================================ */}
+              <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row">
+                {/* Bouton PRINCIPAL → page détail complète */}
+                <Link
+                  href={`/realisations/${selectedProject.id}`}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#0066FF] px-6 py-3 font-bold text-white transition hover:bg-[#0052cc]"
+                >
+                  <FaExternalLinkAlt size={11} />
+                  Voir la fiche complète
+                </Link>
+
+                {/* Bouton SECONDAIRE → demande de devis */}
                 <Link
                   href="/devis"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#0066FF] px-8 py-3 font-bold text-white transition hover:bg-[#0052cc] md:w-auto"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-800 transition hover:border-[#0066FF]/40 hover:bg-gray-50"
                 >
-                  Demander un devis similaire <FaArrowRight size={12} />
+                  Demander un devis <FaArrowRight size={12} />
                 </Link>
               </div>
             </div>
