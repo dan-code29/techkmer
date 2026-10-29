@@ -1,502 +1,449 @@
-'use client';
+/* ================================================================== */
+/*  APP/PAGE.TSX — PAGE D'ACCUEIL CHEFFBUILD                           */
+/*  ------------------------------------------------------------------ */
+/*  Page d'accueil complète avec 8 sections :                          */
+/*    1. Hero (accroche + CTA + teaser des solutions)                  */
+/*    2. Stats (chiffres clés)                                         */
+/*    3. Solutions (6 pôles en cards uniformes : 5 solutions + CARE)   */
+/*    4. Pourquoi nous (6 arguments différenciants)                    */
+/*    5. Réalisations (rotation dynamique 7 catégories)                */
+/*    6. Méthode en 4 étapes                                           */
+/*    7. Témoignages (3 clients)                                       */
+/*    8. CTA final                                                     */
+/*                                                                     */
+/*  💡 CARE est traité comme les autres : carte dans la grille,        */
+/*     mêmes styles, même taille. Pas de bloc séparé.                  */
+/* ================================================================== */
 
-// ============================================================================
-//  IMPORTS
-// ============================================================================
-import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { formatPrice } from '@/lib/format';
 import {
-  FaBolt, FaSun, FaNetworkWired, FaShieldAlt, FaHome,
-  FaDoorOpen, FaArrowRight, FaCog, FaStar, FaQuoteLeft,
-  FaClipboardList, FaSearchDollar, FaTools, FaHeadset,
+  FaArrowRight, FaCheckCircle, FaPhoneAlt,
+  FaShieldAlt, FaSun, FaNetworkWired, FaHome, FaBolt, FaCog,
+  FaClock, FaAward, FaUsers, FaTools, FaQuoteLeft,
 } from 'react-icons/fa';
+import HomeRealisations from '@/components/HomeRealisations';
+import { SOLUTIONS } from '@/lib/solutions';
 
-// ============================================================================
-//  TYPES
-// ============================================================================
-type Product = {
-  id: number;
-  name: string;
-  price: number;
-  image: string | null;
-  category: string;
-  salesCount: number;
-  isPromotion: number;
-  dateAdded: string;
-};
+/* ================================================================== */
+/*  DONNÉES STATIQUES DE LA PAGE                                       */
+/* ================================================================== */
 
-// ============================================================================
-//  DONNÉES STATIQUES
-// ============================================================================
-
-// ✅ SOLUTIONS — Chaque lien pointe vers une PAGE DÉDIÉE
-const SOLUTIONS = [
-  {
-    id: 'electrical',
-    icon: FaBolt,
-    label: 'ENERGY',
-    subtitle: 'Électricité & Solaire',
-    items: ['Systèmes électriques', 'Énergie solaire', 'Onduleurs & batteries', 'Éclairage'],
-    color: 'text-amber-400',
-    href: '/solutions/electrical',      // ✅ Page dédiée
-  },
-  {
-    id: 'connectivity',
-    icon: FaNetworkWired,
-    label: 'CONNECTIVITY',
-    subtitle: 'Réseaux & Informatique',
-    items: ['Infrastructure réseau', 'Wi-Fi pro', 'Câblage structuré', 'Téléphonie IP'],
-    color: 'text-blue-400',
-    href: '/solutions/connectivity',    // ✅ Page dédiée
-  },
-  {
-    id: 'smart',
-    icon: FaHome,
-    label: 'SMART BUILDING',
-    subtitle: 'Domotique & Automatisation',
-    items: ['Domotique', 'Éclairage intelligent', 'Accès connecté', 'Scénarios'],
-    color: 'text-cyan-400',
-    href: '/solutions/smart',           // ✅ Page dédiée
-  },
-  {
-    id: 'security',
-    icon: FaShieldAlt,
-    label: 'SECURITY',
-    subtitle: 'Sécurité électronique',
-    items: ['Vidéosurveillance', 'Contrôle d’accès', 'Alarmes', 'Clôtures électriques'],
-    color: 'text-red-400',
-    href: '/solutions/security',        // ✅ Page dédiée
-  },
-  {
-    id: 'automation',
-    icon: FaCog,
-    label: 'AUTOMATION',
-    subtitle: 'Automatisation',
-    items: ['Portails motorisés', 'Portes automatiques', 'Barrières', 'Industriel'],
-    color: 'text-purple-400',
-    href: '/solutions/automation',      // ✅ Page dédiée
-  },
-];
-
-const WHY_US = [
-  { n: '01', title: 'Solutions intégrées', desc: 'Un seul partenaire pour plusieurs systèmes techniques.' },
-  { n: '02', title: 'Installation professionnelle', desc: 'Conception, pose, configuration et mise en service.' },
-  { n: '03', title: 'Équipements de qualité', desc: 'Matériel fiable sélectionné pour un usage professionnel.' },
-  { n: '04', title: 'Support après-vente', desc: 'Maintenance, dépannage et assistance technique.' },
-  { n: '05', title: 'Solutions sur mesure', desc: 'Chaque projet est conçu autour de votre bâtiment.' },
-];
-
-const PROJECTS = [
-  { img: '/images/projects/cctv.jpg', tag: 'Sécurité', title: 'Vidéosurveillance commerciale' },
-  { img: '/images/projects/solar.jpg', tag: 'Solaire', title: 'Installation solaire résidentielle' },
-  { img: '/images/projects/network.jpg', tag: 'Réseau', title: 'Infrastructure réseau entreprise' },
-  { img: '/images/projects/smart-home.jpg', tag: 'Domotique', title: 'Maison connectée' },
-];
-
-const SOLUTION_FINDER = [
-  { icon: FaHome, label: 'Sécuriser ma maison', href: '/devis?domaine=securite' },
-  { icon: FaShieldAlt, label: 'Sécuriser mon entreprise', href: '/devis?domaine=securite' },
-  { icon: FaSun, label: 'Passer au solaire', href: '/devis?domaine=solaire' },
-  { icon: FaNetworkWired, label: 'Installer un réseau', href: '/devis?domaine=reseau' },
-  { icon: FaHome, label: 'Maison connectée', href: '/devis?domaine=domotique' },
-  { icon: FaDoorOpen, label: 'Portail automatique', href: '/devis?domaine=automatisme' },
-  { icon: FaBolt, label: 'Installation électrique', href: '/devis?domaine=electricite' },
-];
-
-const HOW_IT_WORKS = [
-  { n: 1, icon: FaClipboardList, title: 'Audit du besoin', desc: 'Nous analysons votre projet et vos contraintes.' },
-  { n: 2, icon: FaSearchDollar, title: 'Devis gratuit', desc: 'Proposition transparente sous 24h, sans engagement.' },
-  { n: 3, icon: FaTools, title: 'Installation', desc: 'Conception, pose et mise en service par nos techniciens.' },
-  { n: 4, icon: FaHeadset, title: 'Maintenance', desc: 'Suivi, garantie 12 mois et assistance continue.' },
-];
-
-const TESTIMONIALS = [
-  { name: 'Marie N.', role: 'Directrice — Cabinet médical, Douala', text: 'Équipe très professionnelle. Ils ont installé notre système de vidéosurveillance et l\'alarme en une journée. Zéro problème depuis 8 mois.', rating: 5 },
-  { name: 'Jean-Pierre T.', role: 'Propriétaire villa, Bafoussam', text: 'Installation solaire impeccable. Nous avons maintenant de l\'électricité même pendant les coupures.', rating: 5 },
-  { name: 'Estelle M.', role: 'Responsable IT — PME, Yaoundé', text: 'Ils ont refait tout notre réseau et câblage. La différence de débit est spectaculaire.', rating: 5 },
-];
-
+/* --- Stats --- */
 const STATS = [
-  { value: 150, suffix: '+', label: 'Projets réalisés' },
-  { value: 10, suffix: '', label: 'Régions couvertes' },
-  { value: 24, suffix: 'h', label: 'Délai de réponse' },
-  { value: 100, suffix: '%', label: 'Clients satisfaits' },
+  { value: '150+', label: 'Projets livrés', icon: FaAward },
+  { value: '10', label: 'Régions couvertes', icon: FaUsers },
+  { value: '24h', label: 'Devis gratuit', icon: FaClock },
+  { value: '12', label: 'Mois de garantie', icon: FaShieldAlt },
 ];
 
-// ============================================================================
-//  HOOK COMPTEUR ANIMÉ
-// ============================================================================
-function useCountUp(target: number, duration = 1500, start = false) {
-  const [count, setCount] = useState(0);
+/* --- Pourquoi nous choisir --- */
+const WHY_US = [
+  {
+    icon: '🎯',
+    title: 'Un seul interlocuteur',
+    desc: "Un chef de projet dédié coordonne tous les corps de métier. Vous ne gérez qu'un seul contact.",
+  },
+  {
+    icon: '📋',
+    title: 'Une seule facture',
+    desc: 'Fini les devis multiples et les prestataires qui se renvoient la balle. Un contrat clair, un prix juste.',
+  },
+  {
+    icon: '🔗',
+    title: 'Compatibilité garantie',
+    desc: 'Tous nos systèmes communiquent entre eux : électricité, réseau, sécurité, domotique, automatisation.',
+  },
+  {
+    icon: '🛡️',
+    title: 'Fiabilité éprouvée',
+    desc: '150+ projets livrés, 12 mois de garantie, contrats de maintenance sur option.',
+  },
+  {
+    icon: '⚡',
+    title: 'Réactivité 24/7',
+    desc: "Support technique continu, dépannage prioritaire, intervention rapide en cas d'urgence.",
+  },
+  {
+    icon: '🌍',
+    title: 'Ancrage camerounais',
+    desc: 'Équipe locale, matériel disponible au Cameroun, intervention dans les 10 régions.',
+  },
+];
 
-  useEffect(() => {
-    if (!start) return;
-    let startTime: number | null = null;
-    let raf: number;
+/* --- Méthode en 4 étapes --- */
+const PROCESS = [
+  { step: '01', title: 'Audit du besoin', desc: 'Visite technique gratuite, analyse de vos contraintes et de vos objectifs.' },
+  { step: '02', title: 'Devis détaillé', desc: 'Proposition transparente sous 24h, ligne par ligne, sans surprise.' },
+  { step: '03', title: 'Installation', desc: 'Conception, pose, câblage et mise en service par nos techniciens certifiés.' },
+  { step: '04', title: 'Maintenance', desc: 'Suivi, garantie 12 mois et contrats CARE pour durer dans le temps.' },
+];
 
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      setCount(Math.floor(progress * target));
-      if (progress < 1) raf = requestAnimationFrame(step);
-    };
+/* --- Témoignages --- */
+const TESTIMONIALS = [
+  {
+    name: 'M. Ngono',
+    role: 'Propriétaire de villa, Yaoundé',
+    text: "CHEFFBUILD a géré toute l'électricité, le solaire et la domotique de ma villa en un seul contrat. Résultat impeccable, équipe très pro.",
+    rating: 5,
+  },
+  {
+    name: 'Mme Tchouamo',
+    role: 'Directrice, PME à Douala',
+    text: 'Notre réseau et notre vidéosurveillance ont été refaits en 2 semaines. Zéro interruption pendant les travaux. Je recommande vivement.',
+    rating: 5,
+  },
+  {
+    name: 'M. Fotso',
+    role: 'Promoteur immobilier, Bafoussam',
+    text: "Un seul interlocuteur pour tous les lots techniques de mes immeubles. C'est exactement ce que je cherchais depuis des années.",
+    rating: 5,
+  },
+];
 
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration, start]);
-
-  return count;
-}
-
-// ============================================================================
-//  HOME PAGE
-// ============================================================================
+/* ================================================================== */
+/*  COMPOSANT PAGE D'ACCUEIL                                           */
+/* ================================================================== */
 export default function HomePage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const [statsVisible, setStatsVisible] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/products')
-      .then((r) => r.json())
-      .then((data) => {
-        setProducts(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    const el = statsRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const promoProducts = useMemo(() => products.filter((p) => p.isPromotion === 1).slice(0, 4), [products]);
-  const bestSellers = useMemo(() => [...products].sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 4), [products]);
-  const newArrivals = useMemo(() => [...products].sort((a, b) => {
-    const da = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
-    const db = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
-    return db - da;
-  }).slice(0, 4), [products]);
-
   return (
-    <div className="bg-white">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#EAF3FF] via-[#DCEBFF] to-[#E6FBFF]">
 
-      {/* ==================================================================
-          HERO — Image de fond CHEFFBUILD
-      ================================================================== */}
-      <section className="relative text-white overflow-hidden min-h-[600px] flex items-center">
-        <div className="absolute inset-0">
-          <Image
-            src="/images/hero/smart-building.jpg"
-            alt="CHEFFBUILD Smart Building"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#050B16]/95 via-[#050B16]/75 to-[#050B16]/30" />
-        </div>
+      {/* ============ FOND DYNAMIQUE GLOBAL ============ */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="animate-blob absolute -top-40 -right-32 h-[500px] w-[500px] rounded-full bg-[#0066FF]/20 blur-3xl" />
+        <div className="animate-blob animation-delay-2000 absolute top-1/3 -left-40 h-[420px] w-[420px] rounded-full bg-[#00C2FF]/20 blur-3xl" />
+        <div className="animate-blob animation-delay-4000 absolute bottom-0 right-1/4 h-[450px] w-[450px] rounded-full bg-[#7C3AED]/10 blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, #0066FF 1px, transparent 0)',
+            backgroundSize: '32px 32px',
+          }}
+        />
+      </div>
 
-        <div className="relative container mx-auto px-6 md:px-12 py-24 md:py-32 max-w-3xl">
-          <span className="inline-block bg-white/10 backdrop-blur-md border border-white/30 text-white text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest shadow-lg">
-            SMART BUILDING & TECHNICAL SOLUTIONS
-          </span>
-
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] mb-6">
-            Smart Solutions
-            <br />
-            for a <span className="text-[#00C2FF]">Better Tomorrow</span>
-          </h1>
-
-          <p className="text-base md:text-lg text-gray-200 mb-2 tracking-wider font-medium">
-            ⚡ Energy • 🌐 Connectivity • 🏠 Automation • 🛡️ Security
-          </p>
-
-          <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-xl">
-            CHEFFBUILD conçoit, installe et maintient des systèmes techniques complets
-            pour les bâtiments modernes au Cameroun.
-          </p>
-
-          <div className="flex flex-wrap gap-4">
-            <Link
-              href="/services"
-              className="bg-[#0066FF] hover:bg-[#0052cc] text-white font-bold py-4 px-8 rounded-lg transition flex items-center gap-2 shadow-lg shadow-[#0066FF]/30"
-            >
-              EXPLORER NOS SOLUTIONS <FaArrowRight />
-            </Link>
-            <Link
-              href="/devis"
-              className="border-2 border-white/40 hover:border-[#00C2FF] hover:text-[#00C2FF] backdrop-blur-sm text-white font-bold py-4 px-8 rounded-lg transition"
-            >
-              DEMANDER UN DEVIS
-            </Link>
-          </div>
-
-          <div className="flex flex-wrap gap-6 mt-10 text-sm text-gray-300">
-            <span className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              Disponible 24/7
-            </span>
-            <span>✓ Techniciens certifiés</span>
-            <span>✓ Garantie 12 mois</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================
-          STATS ANIMÉES
-      ================================================================== */}
-      <section ref={statsRef} className="bg-white border-b">
-        <div className="container mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {STATS.map((s) => (
-            <StatItem key={s.label} value={s.value} suffix={s.suffix} label={s.label} start={statsVisible} />
-          ))}
-        </div>
-      </section>
-
-      {/* ==================================================================
-          OUR SOLUTIONS — 5 piliers avec liens DÉDIÉS
-      ================================================================== */}
-      <section className="relative py-20 text-white overflow-hidden">
-        {/* Image de fond */}
-        <div className="absolute inset-0">
-          <Image
-            src="/images/hero/solutions-bg.jpg"
-            alt="Nos solutions techniques"
-            fill
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-[#050B16]/92" />
-        </div>
-
-        <div className="relative container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-[#00C2FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
-              Our Solutions
-            </p>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              One company. <span className="text-[#00C2FF]">Complete solutions.</span>
-            </h2>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              Cinq pôles techniques, une seule équipe pour concevoir, installer et maintenir l&apos;ensemble de vos infrastructures.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {SOLUTIONS.map((s) => {
-              const Icon = s.icon;
-              return (
-                <Link
-                  key={s.id}
-                  href={s.href}
-                  className="group bg-white/5 border border-white/10 hover:border-[#00C2FF]/60 rounded-2xl p-6 transition duration-300 hover:-translate-y-2 hover:bg-white/10 backdrop-blur-sm"
-                >
-                  <Icon className={`${s.color} mb-4`} size={36} />
-                  <h3 className="text-sm font-bold tracking-widest text-[#00C2FF] mb-1">
-                    {s.label}
-                  </h3>
-                  <p className="text-base font-semibold mb-3">{s.subtitle}</p>
-                  <ul className="space-y-1.5 mb-5 text-xs text-gray-300">
-                    {s.items.map((it) => (
-                      <li key={it} className="flex items-start gap-2">
-                        <span className="text-[#00C2FF]">•</span>
-                        {it}
-                      </li>
-                    ))}
-                  </ul>
-                  <span className="text-[#00C2FF] text-xs font-bold inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Découvrir <FaArrowRight size={10} />
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================
-          WHY CHOOSE US
-      ================================================================== */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
-              Pourquoi nous choisir
-            </p>
-            <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">
-              Why choose CHEFFBUILD?
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
-            {WHY_US.map((w) => (
-              <div key={w.n} className="border-t-2 border-[#0066FF] pt-6">
-                <p className="text-4xl font-bold text-[#00C2FF] mb-3">{w.n}</p>
-                <h3 className="font-bold text-[#050B16] mb-2">{w.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{w.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================
-          HOW IT WORKS
-      ================================================================== */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">
-              How it works
-            </p>
-            <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">
-              Votre projet en 4 étapes
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-            <div className="hidden lg:block absolute top-12 left-[12%] right-[12%] h-0.5 bg-[#00C2FF]/20 z-0" />
-            {HOW_IT_WORKS.map((step) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.n} className="relative z-10 text-center">
-                  <div className="w-24 h-24 mx-auto rounded-2xl bg-white border-2 border-[#0066FF] flex items-center justify-center shadow-lg mb-4 relative">
-                    <Icon className="text-[#0066FF]" size={32} />
-                    <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#0066FF] text-white text-sm font-bold flex items-center justify-center">
-                      {step.n}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-[#050B16] mb-2">{step.title}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto">{step.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================================================================
-          OUR PROJECTS
-      ================================================================== */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap items-end justify-between mb-10">
+      {/* ============================================================ */}
+      {/*  1. HERO                                                     */}
+      {/* ============================================================ */}
+      <section className="relative z-10">
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            {/* Texte */}
             <div>
-              <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-2">
-                Our Projects
+              <span className="mb-5 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">
+                CHEFFBUILD Smart Systems
+              </span>
+              <h1 className="mb-6 text-4xl font-bold leading-tight text-gray-900 md:text-5xl lg:text-6xl">
+                Connecter, sécuriser et{' '}
+                <span className="animate-gradient bg-gradient-to-r from-[#0066FF] via-[#00C2FF] to-[#0066FF] bg-clip-text text-transparent">
+                  automatiser
+                </span>{' '}
+                vos bâtiments
+              </h1>
+              <p className="mb-8 max-w-xl text-lg text-gray-700 md:text-xl">
+                Intégrateur camerounais de solutions techniques du bâtiment.
+                Un seul partenaire pour l'électricité, le solaire, le réseau,
+                la sécurité, la domotique et l'automatisation.
               </p>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#050B16]">
-                Ce que nous réalisons
-              </h2>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/devis"
+                  className="rounded-full bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-8 py-3 font-semibold text-white shadow-lg shadow-[#0066FF]/30 transition hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  Demander un devis
+                </Link>
+                <Link
+                  href="/solutions"
+                  className="rounded-full border border-gray-300 bg-white/80 px-8 py-3 font-semibold text-gray-800 backdrop-blur transition hover:-translate-y-0.5 hover:border-[#0066FF]/40 hover:bg-white"
+                >
+                  Découvrir nos solutions
+                </Link>
+              </div>
+              {/* Badges de réassurance */}
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-600">
+                <span className="flex items-center gap-1.5">
+                  <FaCheckCircle className="text-[#00C2FF]" size={14} /> Devis gratuit
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <FaCheckCircle className="text-[#00C2FF]" size={14} /> Réponse sous 24h
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <FaCheckCircle className="text-[#00C2FF]" size={14} /> Garantie 12 mois
+                </span>
+              </div>
             </div>
-            <Link href="/realisations" className="text-[#0066FF] font-semibold hover:underline flex items-center gap-2">
-              Voir tous les projets <FaArrowRight size={12} />
-            </Link>
+
+            {/* Visuel : grille des 5 solutions (CARE est dans la grille principale, pas ici) */}
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-3">
+                {SOLUTIONS.slice(0, 4).map((s) => (
+                  <Link
+                    key={s.slug}
+                    href={`/solutions/${s.slug}`}
+                    className={`group rounded-2xl border-2 bg-white/70 p-5 backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/90 hover:shadow-xl ${s.colors.border}`}
+                  >
+                    <div className="mb-2 text-3xl">{s.icon}</div>
+                    <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500">
+                      {s.tagline}
+                    </div>
+                    <div className="mt-1 text-sm font-bold text-gray-900 group-hover:text-[#0066FF]">
+                      {s.name.replace('CHEFFBUILD ', '')}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              {SOLUTIONS[4] && (
+                <Link
+                  href={`/solutions/${SOLUTIONS[4].slug}`}
+                  className={`group mt-3 flex items-center gap-4 rounded-2xl border-2 bg-white/70 p-5 backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/90 hover:shadow-xl ${SOLUTIONS[4].colors.border}`}
+                >
+                  <span className="text-4xl">{SOLUTIONS[4].icon}</span>
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500">
+                      {SOLUTIONS[4].tagline}
+                    </div>
+                    <div className="text-sm font-bold text-gray-900">
+                      {SOLUTIONS[4].name.replace('CHEFFBUILD ', '')}
+                    </div>
+                  </div>
+                </Link>
+              )}
+              <div className="absolute -bottom-4 -left-4 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lg backdrop-blur-md">
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#0066FF]">
+                  Intégrateur
+                </div>
+                <div className="text-sm font-medium text-gray-900">Tous les lots techniques</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/*  2. STATS                                                    */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {STATS.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl border border-white/70 bg-white/70 p-6 backdrop-blur-md transition hover:-translate-y-0.5 hover:border-[#0066FF]/40 hover:shadow-md"
+                >
+                  <Icon className="mb-3 text-[#0066FF]" size={20} />
+                  <div className="text-3xl font-bold text-[#0066FF] md:text-4xl">
+                    {stat.value}
+                  </div>
+                  <div className="mt-1 text-sm text-gray-700">{stat.label}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/*  3. SOLUTIONS (6 pôles : 5 solutions + CARE en uniforme)     */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-20">
+        <div className="container mx-auto px-4">
+          <div className="mb-12 text-center">
+            <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">
+              Nos solutions
+            </span>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+              Six domaines,{' '}
+              <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">
+                un seul partenaire
+              </span>
+            </h2>
+            <p className="mx-auto max-w-2xl text-gray-600">
+              Tous les lots techniques de votre bâtiment, conçus, installés et
+              maintenus par une seule équipe.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {PROJECTS.map((p) => (
-              <Link key={p.title} href="/realisations" className="group relative h-72 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition">
-                <Image src={p.img} alt={p.title} fill className="object-cover group-hover:scale-110 transition duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-5 text-white">
-                  <span className="inline-block bg-[#00C2FF] text-[#050B16] text-[10px] font-bold px-2 py-1 rounded mb-2 uppercase tracking-widest">
-                    {p.tag}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Les 5 solutions existantes */}
+            {SOLUTIONS.map((solution) => (
+              <Link
+                key={solution.slug}
+                href={`/solutions/${solution.slug}`}
+                className={`group rounded-2xl border-2 bg-white/70 p-6 backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:bg-white/90 hover:shadow-xl md:p-8 ${solution.colors.border}`}
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="text-5xl">{solution.icon}</div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest shadow-md ${solution.colors.badge}`}
+                  >
+                    {solution.tagline}
                   </span>
-                  <p className="font-bold text-base leading-tight">{p.title}</p>
                 </div>
+                <h3 className="mb-2 text-lg font-bold text-gray-900 group-hover:text-[#0066FF]">
+                  {solution.name}
+                </h3>
+                <p className="mb-4 text-sm leading-relaxed text-gray-600">
+                  {solution.shortDesc}
+                </p>
+                <span className={`inline-flex items-center gap-1 text-sm font-semibold ${solution.colors.accent} transition-all group-hover:gap-2`}>
+                  En savoir plus <FaArrowRight size={10} />
+                </span>
               </Link>
             ))}
+
+            {/* 6e card : CARE — même style, même taille, pas de mise en avant */}
+            <Link
+              href="/care"
+              className="group rounded-2xl border-2 border-emerald-300 bg-white/70 p-6 backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-emerald-500 hover:bg-white/90 hover:shadow-xl hover:shadow-emerald-500/20 md:p-8"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="text-5xl">🔧</div>
+                <span className="rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-md">
+                  Maintenance
+                </span>
+              </div>
+              <h3 className="mb-2 text-lg font-bold text-gray-900 group-hover:text-emerald-600">
+                CHEFFBUILD CARE
+              </h3>
+              <p className="mb-4 text-sm leading-relaxed text-gray-600">
+                Maintenance dans tous nos domaines, maintenance générale du bâtiment
+                et administration technique — un contrat unique.
+              </p>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-500 transition-all group-hover:gap-2">
+                En savoir plus <FaArrowRight size={10} />
+              </span>
+            </Link>
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              href="/solutions"
+              className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white/80 px-8 py-3 font-semibold text-gray-800 backdrop-blur transition hover:-translate-y-0.5 hover:border-[#0066FF]/40 hover:bg-white"
+            >
+              Voir toutes les solutions <FaArrowRight size={12} />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ==================================================================
-          BOUTIQUE
-      ================================================================== */}
-      <section className="py-20 bg-gray-50">
+      {/* ============================================================ */}
+      {/*  4. POURQUOI CHEFFBUILD                                      */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-2">Shop Our Products</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#050B16] mb-3">Équipements professionnels</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Les produits que nous installons, disponibles dans notre boutique en ligne.</p>
+          <div className="mb-12 text-center">
+            <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">
+              Pourquoi nous choisir
+            </span>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+              Ce qui nous{' '}
+              <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">
+                différencie
+              </span>
+            </h2>
+            <p className="mx-auto max-w-2xl text-gray-600">
+              Six engagements concrets qui font la différence sur chaque projet.
+            </p>
           </div>
 
-          {promoProducts.length > 0 && (
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl">🔥</span>
-                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">Offres spéciales</h3>
-                <Link href="/boutique?filter=promo" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">Tout voir →</Link>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {WHY_US.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-white/70 bg-white/70 p-6 backdrop-blur-md transition hover:-translate-y-1 hover:border-[#0066FF]/40 hover:bg-white/90 hover:shadow-lg"
+              >
+                <div className="mb-4 text-4xl">{item.icon}</div>
+                <h3 className="mb-2 text-lg font-bold text-gray-900">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600">{item.desc}</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {promoProducts.map((p) => <ProductCard key={p.id} product={p} highlight />)}
-              </div>
-            </div>
-          )}
-
-          {bestSellers.length > 0 && (
-            <div className="mb-16">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl">⭐</span>
-                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">Best Sellers</h3>
-                <Link href="/boutique?filter=best" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">Tout voir →</Link>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {bestSellers.map((p) => <ProductCard key={p.id} product={p} />)}
-              </div>
-            </div>
-          )}
-
-          {newArrivals.length > 0 && (
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl">🆕</span>
-                <h3 className="text-xl font-bold text-[#050B16] uppercase tracking-wide">Nouveautés</h3>
-                <Link href="/boutique" className="ml-auto text-sm text-[#0066FF] font-semibold hover:underline">Tout voir →</Link>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {newArrivals.map((p) => <ProductCard key={p.id} product={p} />)}
-              </div>
-            </div>
-          )}
-
-          {loading && <p className="text-center text-gray-400 py-10">Chargement des produits…</p>}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ==================================================================
-          TÉMOIGNAGES
-      ================================================================== */}
-      <section className="py-20 bg-white">
+      {/* ============================================================ */}
+      {/*  5. NOS RÉALISATIONS (rotation dynamique)                    */}
+      {/* ============================================================ */}
+      <div className="relative z-10">
+        <HomeRealisations />
+      </div>
+
+      {/* ============================================================ */}
+      {/*  6. MÉTHODE EN 4 ÉTAPES                                      */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-14">
-            <p className="text-[#0066FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">Témoignages</p>
-            <h2 className="text-3xl md:text-5xl font-bold text-[#050B16]">Ils nous font confiance</h2>
+          <div className="mb-12 text-center">
+            <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">
+              Notre méthode
+            </span>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+              Simple, transparent,{' '}
+              <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">
+                efficace
+              </span>
+            </h2>
+            <p className="mx-auto max-w-2xl text-gray-600">
+              Du premier contact à la maintenance, en 4 étapes claires.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-4">
+            {PROCESS.map((step) => (
+              <div
+                key={step.step}
+                className="relative rounded-2xl border border-white/70 bg-white/70 p-6 backdrop-blur-md"
+              >
+                <div className="mb-3 text-4xl font-bold text-[#0066FF]/40">
+                  {step.step}
+                </div>
+                <h3 className="mb-2 font-semibold text-gray-900">{step.title}</h3>
+                <p className="text-sm text-gray-600">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/*  7. TÉMOIGNAGES                                              */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-20">
+        <div className="container mx-auto px-4">
+          <div className="mb-12 text-center">
+            <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">
+              Témoignages
+            </span>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+              Ils nous font{' '}
+              <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">
+                confiance
+              </span>
+            </h2>
+            <p className="mx-auto max-w-2xl text-gray-600">
+              Ce que nos clients disent de nous après leur projet.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-gray-50 rounded-2xl p-6 border border-gray-100 relative hover:shadow-lg transition">
-                <FaQuoteLeft className="text-[#00C2FF]/30 absolute top-6 right-6" size={28} />
-                <div className="flex gap-1 mb-4">
+              <div
+                key={t.name}
+                className="rounded-2xl border border-white/70 bg-white/70 p-6 backdrop-blur-md"
+              >
+                <FaQuoteLeft className="mb-3 text-[#00C2FF]/40" size={24} />
+                <p className="mb-5 text-sm leading-relaxed text-gray-700 italic">
+                  « {t.text} »
+                </p>
+                <div className="flex items-center gap-1 text-yellow-400">
                   {Array.from({ length: t.rating }).map((_, i) => (
-                    <FaStar key={i} className="text-amber-400" size={14} />
+                    <span key={i}>★</span>
                   ))}
                 </div>
-                <p className="text-gray-700 leading-relaxed mb-5 italic">« {t.text} »</p>
-                <div>
-                  <p className="font-bold text-[#050B16]">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role}</p>
+                <div className="mt-3 border-t border-gray-200 pt-3">
+                  <div className="font-semibold text-gray-900">{t.name}</div>
+                  <div className="text-xs text-gray-500">{t.role}</div>
                 </div>
               </div>
             ))}
@@ -504,67 +451,37 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================================================================
-          SOLUTION FINDER
-      ================================================================== */}
-      <section className="relative py-20 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[#050B16]" />
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,#00C2FF,transparent_60%)]" />
-        <div className="relative container mx-auto px-4 max-w-5xl">
-          <div className="text-center mb-12">
-            <p className="text-[#00C2FF] font-bold text-xs uppercase tracking-[0.3em] mb-3">Solution Finder</p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">De quoi avez-vous besoin ?</h2>
-            <p className="text-gray-400">Choisissez votre besoin — nous vous guidons vers la bonne solution.</p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {SOLUTION_FINDER.map((s) => {
-              const Icon = s.icon;
-              return (
-                <Link key={s.label} href={s.href} className="group flex items-center gap-3 bg-white/5 border border-white/10 hover:border-[#00C2FF] hover:bg-[#00C2FF]/10 rounded-xl p-4 transition">
-                  <span className="w-10 h-10 rounded-lg bg-[#00C2FF]/20 flex items-center justify-center text-[#00C2FF] shrink-0">
-                    <Icon size={18} />
-                  </span>
-                  <span className="text-sm font-semibold leading-snug">{s.label}</span>
-                  <FaArrowRight className="ml-auto text-[#00C2FF] opacity-0 group-hover:opacity-100 transition" size={12} />
-                </Link>
-              );
-            })}
+      {/* ============================================================ */}
+      {/*  8. CTA FINAL                                                */}
+      {/* ============================================================ */}
+      <section className="relative z-10 py-20">
+        <div className="container mx-auto max-w-4xl px-4">
+          <div className="rounded-3xl border border-white/70 bg-gradient-to-br from-[#0066FF] to-[#00C2FF] p-10 text-center text-white shadow-xl shadow-[#0066FF]/20 md:p-14">
+            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+              Prêt à démarrer votre projet&nbsp;?
+            </h2>
+            <p className="mx-auto mb-8 max-w-2xl text-lg text-white/90">
+              Devis gratuit sous 24h. Un interlocuteur unique, une seule facture,
+              une cohérence garantie entre tous vos systèmes.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link
+                href="/devis"
+                className="rounded-lg bg-white px-8 py-3 font-bold text-[#0066FF] shadow-xl transition hover:-translate-y-0.5 hover:bg-gray-100"
+              >
+                Demander un devis
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/40 bg-white/10 px-8 py-3 font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/20"
+              >
+                <FaPhoneAlt size={12} /> Nous contacter
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
     </div>
-  );
-}
-
-// ============================================================================
-//  SOUS-COMPOSANTS
-// ============================================================================
-function StatItem({ value, suffix, label, start }: { value: number; suffix: string; label: string; start: boolean }) {
-  const count = useCountUp(value, 1500, start);
-  return (
-    <div>
-      <p className="text-3xl md:text-4xl font-bold text-[#0066FF]">{count}{suffix}</p>
-      <p className="text-xs md:text-sm text-gray-500 mt-1 uppercase tracking-wide">{label}</p>
-    </div>
-  );
-}
-
-function ProductCard({ product, highlight = false }: { product: Product; highlight?: boolean }) {
-  const imageSrc = product.image && typeof product.image === 'string' ? product.image : '/images/placeholder.jpg';
-  return (
-    <Link href={`/produit/${product.id}`} className={`group bg-white rounded-xl overflow-hidden border transition hover:shadow-2xl hover:-translate-y-1 ${highlight ? 'border-[#00C2FF]/50' : 'border-gray-100'}`}>
-      <div className="relative h-44 bg-gray-50">
-        <Image src={imageSrc} alt={product.name} fill className="object-contain p-4 group-hover:scale-105 transition duration-300" />
-        {product.isPromotion === 1 && <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded">PROMO</span>}
-        {product.salesCount > 50 && <span className="absolute top-2 right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded">🔥 TOP</span>}
-      </div>
-      <div className="p-4">
-        <p className="text-[10px] text-[#00C2FF] font-bold uppercase tracking-widest mb-1">{product.category}</p>
-        <h3 className="text-sm font-semibold text-[#050B16] line-clamp-2 mb-3 leading-snug min-h-[40px]">{product.name}</h3>
-        <p className="text-[#0066FF] font-bold text-base">{formatPrice(product.price)}</p>
-      </div>
-    </Link>
   );
 }
