@@ -6,6 +6,7 @@ import {
   FaBox, FaShoppingCart, FaFileAlt, FaUsers, FaPlus, FaChartLine,
   FaEnvelope, FaPhone, FaClock, FaCheckCircle, FaExclamationTriangle,
   FaArrowRight, FaSearch, FaSync,
+  FaImages,
 } from 'react-icons/fa';
 
 /* ------------------------------------------------------------------ */
@@ -276,6 +277,23 @@ export default function AdminPage() {
               href="/admin/users"
               gradient="from-orange-600 to-amber-500"
             />
+            {/* NOUVELLE CARTE : RÉALISATIONS */}
+<Link 
+  href="/admin/projects" 
+  className="bg-pink-600 hover:bg-pink-700 transition rounded-xl p-6 text-white flex flex-col justify-between shadow-sm"
+>
+  <div>
+    <div className="bg-white/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4">
+      <FaImages size={20} />
+    </div>
+    <h3 className="font-bold text-lg">Réalisations</h3>
+    <p className="text-sm text-pink-100 mt-1">Gérer le portfolio</p>
+  </div>
+  <div className="mt-4 font-semibold text-sm flex items-center gap-2">
+    Ouvrir <span>→</span>
+  </div>
+</Link>
+            
           </div>
         </div>
 
