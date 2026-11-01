@@ -6,7 +6,7 @@
 /*  Section "Nos réalisations" pour la page d'accueil.                 */
 /*  - 7 cards (1 par catégorie)                                        */
 /*  - Rotation indépendante (délais décalés)                           */
-/*  - Fix Hydration : état initial déterministe (pas de Math.random)   */
+/*  - NOUVEAU : Récupère les données dynamiquement depuis /api/projects*/
 /* ================================================================== */
 
 import { useState, useEffect } from 'react';
@@ -18,12 +18,9 @@ import {
 } from 'react-icons/fa';
 
 import {
-  PROJECTS, // ← On importe PROJECTS pour l'état initial
   CATEGORY_LABELS,
   CATEGORY_STYLES,
   CATEGORY_ORDER,
-  pickProjectForCategory,
-  pickAllCategories,
   type Project,
   type ProjectCategory,
 } from '@/lib/projects';
@@ -39,40 +36,88 @@ const CATEGORY_ICONS: Record<ProjectCategory, React.ComponentType<{ size?: numbe
 };
 
 export default function HomeRealisations() {
-  /* ---------- ÉTAT INITIAL DÉTERMINISTE (Fix Hydration) ---------- */
-  const [displayed, setDisplayed] = useState<Record<ProjectCategory, Project | null>>(() => {
-    const initial = {} as Record<ProjectCategory, Project | null>;
-    // On prend le PREMIER projet de chaque catégorie pour le rendu serveur
-    CATEGORY_ORDER.forEach((cat) => {
-      initial[cat] = PROJECTS.find((p) => p.category === cat) || null;
-    });
-    return initial;
-  });
+  // On stocke tous les projets récupérés depuis l'API
+  const [projects, setProjects] = useState<Project[]>([]);
+  
+  // On stocke le projet actuellement affiché pour chaque catégorie
+  const [displayed, setDisplayed] = useState<Record<ProjectCategory, Project | null>>(
+    {} as Record<ProjectCategory, Project | null>
+  );
+  
+  // État de chargement
+  const [loading, setLoading] = useState(true);
 
-  /* ---------- ROTATION (uniquement côté client) ---------- */
+  /* ---------- 1. CHARGEMENT DES DONNÉES DEPUIS L'API ---------- */
   useEffect(() => {
-    // 1. Dès le montage client, on randomise
-    setDisplayed(pickAllCategories());
+    fetch('/api/projects')
+      .then((res) => res.json())
+      .then((data: Project[]) => {
+        setProjects(data);
 
-    // 2. Puis on lance les intervalles décalés
+        // Initialiser l'affichage avec le premier projet trouvé pour chaque catégorie
+        const initialDisplayed = {} as Record<ProjectCategory, Project | null>;
+        CATEGORY_ORDER.forEach((cat) => {
+          initialDisplayed[cat] = data.find((p) => p.category === cat) || null;
+        });
+        setDisplayed(initialDisplayed);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Erreur de chargement des projets:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  /* ---------- 2. ROTATION ALÉATOIRE ---------- */
+  useEffect(() => {
+    // On ne lance la rotation que si on a des projets
+    if (projects.length === 0) return;
+
     const intervals = CATEGORY_ORDER.map((cat, i) =>
       setInterval(
         () => {
-          setDisplayed((prev) => ({
-            ...prev,
-            [cat]: pickProjectForCategory(cat, prev[cat]?.id),
-          }));
+          setDisplayed((prev) => {
+            // On cherche tous les projets de cette catégorie, sauf celui affiché actuellement
+            const pool = projects.filter(
+              (p) => p.category === cat && p.id !== prev[cat]?.id
+            );
+
+            // S'il n'y a pas d'autre projet dans cette catégorie, on ne change rien
+            if (pool.length === 0) return prev;
+
+            // On tire un projet au hasard
+            const randomProject = pool[Math.floor(Math.random() * pool.length)];
+            
+            return {
+              ...prev,
+              [cat]: randomProject,
+            };
+          });
         },
-        5000 + i * 800
+        5000 + i * 800 // Délais décalés pour un effet organique
       )
     );
 
     return () => intervals.forEach(clearInterval);
-  }, []);
+  }, [projects]);
 
+  /* ---------- 3. AFFICHAGE DU CHARGEMENT ---------- */
+  if (loading) {
+    return (
+      <section className="relative py-20">
+        <div className="container mx-auto px-4 text-center">
+          <div className="w-10 h-10 border-4 border-[#0066FF] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="mt-4 text-gray-500">Chargement des réalisations...</p>
+        </div>
+      </section>
+    );
+  }
+
+  /* ---------- 4. RENDU PRINCIPAL ---------- */
   return (
     <section className="relative py-20">
       <div className="container mx-auto px-4">
+        {/* --- EN-TÊTE --- */}
         <div className="mb-12 text-center">
           <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">
             Portfolio
@@ -88,9 +133,12 @@ export default function HomeRealisations() {
           </p>
         </div>
 
+        {/* --- GRILLE DES 7 CATÉGORIES --- */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORY_ORDER.map((cat) => {
             const project = displayed[cat];
+            
+            // Si aucune réalisation n'existe pour cette catégorie, on n'affiche rien
             if (!project) return null;
 
             const Icon = CATEGORY_ICONS[cat];
@@ -105,23 +153,29 @@ export default function HomeRealisations() {
                 <div className="relative h-48 overflow-hidden">
                   <Image
                     key={project.id}
-                    src={project.images[0]}
+                    src={project.images[0] || '/images/placeholder.jpg'}
                     alt={project.title}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover transition duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  
+                  {/* Badge Catégorie */}
                   <span className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest shadow-md ${styles.badge}`}>
                     <Icon size={10} />
                     {CATEGORY_LABELS[cat]}
                   </span>
+                  
+                  {/* Titre */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                     <p className="line-clamp-2 text-sm font-bold leading-tight">
                       {project.title}
                     </p>
                   </div>
                 </div>
+                
+                {/* Infos (Lieu & Date) */}
                 <div className="p-4">
                   <div className="flex items-center gap-3 text-[11px] text-gray-500">
                     <span className="flex items-center gap-1">
@@ -137,6 +191,7 @@ export default function HomeRealisations() {
           })}
         </div>
 
+        {/* --- BOUTON VOIR TOUT --- */}
         <div className="mt-12 text-center">
           <Link
             href="/realisations"
