@@ -78,7 +78,7 @@ export default function ProjectForm({ initialData = null, id = null }: { initial
       const payload = {
         ...form,
         images: finalImages,
-        features: form.features.split(',').map(s => s.trim()).filter(Boolean),
+        features: form.features.split(',').map((s: string) => s.trim()).filter(Boolean),
       };
 
       const url = id ? `/api/projects/${id}` : '/api/projects';
