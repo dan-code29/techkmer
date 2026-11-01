@@ -5,64 +5,73 @@ import { getToken } from 'next-auth/jwt';
 
 export async function POST(request: NextRequest) {
   try {
-    // Vérification de l'authentification admin
+    // 1. Vérification de l'authentification admin
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
     if (!token || token.role !== 'admin') {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
-    // Sur Vercel, le disque n'est pas persistant et on ne peut pas écrire dans public
-    if (process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
+    // 2. Vérification pour Vercel (sécurité)
+    // Note: On bloque seulement si on est sur Vercel pour te permettre de tester en local
+    if (process.env.VERCEL === '1') {
       return NextResponse.json(
         {
           error:
-            'Upload impossible en production sur Vercel : le stockage local n’est pas persistant. Utilisez un service de stockage externe (Cloudinary, S3, etc.).',
+            'Upload impossible en production sur Vercel. Utilisez un service externe.',
         },
         { status: 500 }
       );
     }
 
-    // Récupération du fichier
+    // 3. Récupération des fichiers (AU PLURIEL)
     const formData = await request.formData();
-    const file = formData.get('image') as File;
-    if (!file) {
-      return NextResponse.json({ error: 'Aucun fichier' }, { status: 400 });
+    const files = formData.getAll('files') as File[]; // On récupère TOUS les fichiers envoyés
+
+    if (!files || files.length === 0) {
+      return NextResponse.json({ error: 'Aucun fichier reçu' }, { status: 400 });
     }
 
-    // Vérification du type MIME
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Type de fichier non autorisé. Utilisez JPG, PNG ou WEBP.' },
-        { status: 400 }
-      );
+    const uploadedUrls: string[] = [];
+
+    // 4. Boucle pour traiter chaque fichier
+    for (const file of files) {
+      // Vérification du type MIME
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        return NextResponse.json({ error: 'Type de fichier non autorisé.' }, { status: 400 });
+      }
+
+      // Vérification de la taille (max 5 Mo)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        return NextResponse.json({ error: 'Le fichier dépasse 5 Mo.' }, { status: 400 });
+      }
+
+      // Génération du nom unique
+      const timestamp = Date.now();
+      // On nettoie le nom pour éviter les espaces
+      const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
+      const filename = `${timestamp}-${safeName}`;
+      
+      // On sauvegarde dans le dossier des réalisations
+      const relativePath = `/images/projects/${filename}`;
+      const absolutePath = path.join(process.cwd(), 'public', relativePath);
+
+      // Création du dossier si nécessaire (au cas où)
+      await mkdir(path.dirname(absolutePath), { recursive: true });
+
+      // Écriture du fichier sur le disque
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      await writeFile(absolutePath, buffer);
+
+      // On ajoute l'URL à la liste
+      uploadedUrls.push(relativePath);
     }
 
-    // Vérification de la taille (max 5 Mo)
-    const maxSize = 5 * 1024 * 1024; // 5 MB
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'Le fichier dépasse la taille maximale autorisée (5 Mo).' },
-        { status: 400 }
-      );
-    }
+    // 5. On renvoie le tableau d'URLs (notre front-end attend "urls")
+    return NextResponse.json({ urls: uploadedUrls });
 
-    // Génération du nom unique
-    const timestamp = Date.now();
-    const ext = path.extname(file.name);
-    const filename = `${timestamp}${ext}`;
-    const relativePath = `/images/produits/${filename}`;
-    const absolutePath = path.join(process.cwd(), 'public', relativePath);
-
-    // Création du dossier si nécessaire
-    await mkdir(path.dirname(absolutePath), { recursive: true });
-
-    // Écriture du fichier
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(absolutePath, buffer);
-
-    return NextResponse.json({ path: relativePath });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Erreur serveur lors de l’upload' }, { status: 500 });
