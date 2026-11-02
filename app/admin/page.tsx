@@ -293,9 +293,26 @@ export default function AdminPage() {
     Ouvrir <span>→</span>
   </div>
 </Link>
+
+{/* Carte des paramètres */}
+<Link 
+  href="/admin/settings" 
+  className="bg-gray-800 hover:bg-gray-900 transition rounded-xl p-6 text-white flex flex-col justify-between shadow-sm"
+>
+  <div>
+    <div className="bg-white/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4">
+      <span className="text-xl">⚙️</span>
+    </div>
+    <h3 className="font-bold text-lg">Chiffres clés</h3>
+    <p className="text-sm text-gray-300 mt-1">Modifier les statistiques</p>
+  </div>
+  <div className="mt-4 font-semibold text-sm flex items-center gap-2">
+    Ouvrir <span>→</span>
+  </div>
+</Link>
             
-          </div>
-        </div>
+  </div>
+</div>
 
         {/* ============ DEVIS ============ */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
