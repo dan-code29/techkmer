@@ -1,34 +1,22 @@
-/* ================================================================== */
-/*  APP/PAGE.TSX — PAGE D'ACCUEIL CHEFFBUILD                           */
-/* ================================================================== */
-
 import Link from 'next/link';
-import { headers } from 'next/headers'; // 👈 Ajouté pour récupérer l'URL de l'API
+import { headers } from 'next/headers'; // 👈 NOUVEL IMPORT IMPORTANT
 import {
   FaArrowRight, FaCheckCircle, FaPhoneAlt,
   FaShieldAlt, FaSun, FaNetworkWired, FaHome, FaBolt, FaCog,
   FaClock, FaAward, FaUsers, FaTools, FaQuoteLeft,
 } from 'react-icons/fa';
+import { turso } from '@/lib/turso';
 import HomeRealisations from '@/components/HomeRealisations';
 import { SOLUTIONS } from '@/lib/solutions';
 import HomeBoutique from '@/components/HomeBoutique';
 
-/* --- Force Next.js à recharger la page pour avoir un choix aléatoire --- */
+// Empêche Next.js de mettre la page en cache pour avoir les vrais chiffres et produits
 export const dynamic = 'force-dynamic';
 
 /* ================================================================== */
 /*  DONNÉES STATIQUES DE LA PAGE                                       */
 /* ================================================================== */
 
-/* --- Stats --- */
-const STATS = [
-  { value: '150+', label: 'Projets livrés', icon: FaAward },
-  { value: '10', label: 'Régions couvertes', icon: FaUsers },
-  { value: '24h', label: 'Devis gratuit', icon: FaClock },
-  { value: '12', label: 'Mois de garantie', icon: FaShieldAlt },
-];
-
-/* --- Pourquoi nous choisir --- */
 const WHY_US = [
   { icon: '🎯', title: 'Un seul interlocuteur', desc: "Un chef de projet dédié coordonne tous les corps de métier. Vous ne gérez qu'un seul contact." },
   { icon: '📋', title: 'Une seule facture', desc: 'Fini les devis multiples et les prestataires qui se renvoient la balle. Un contrat clair, un prix juste.' },
@@ -38,7 +26,6 @@ const WHY_US = [
   { icon: '🌍', title: 'Ancrage camerounais', desc: 'Équipe locale, matériel disponible au Cameroun, intervention dans les 10 régions.' },
 ];
 
-/* --- Méthode en 4 étapes --- */
 const PROCESS = [
   { step: '01', title: 'Audit du besoin', desc: 'Visite technique gratuite, analyse de vos contraintes et de vos objectifs.' },
   { step: '02', title: 'Devis détaillé', desc: 'Proposition transparente sous 24h, ligne par ligne, sans surprise.' },
@@ -46,7 +33,6 @@ const PROCESS = [
   { step: '04', title: 'Maintenance', desc: 'Suivi, garantie 12 mois et contrats CARE pour durer dans le temps.' },
 ];
 
-/* --- Témoignages --- */
 const TESTIMONIALS = [
   { name: 'M. Ngono', role: 'Propriétaire de villa, Yaoundé', text: "CHEFFBUILD a géré toute l'électricité, le solaire et la domotique de ma villa en un seul contrat. Résultat impeccable, équipe très pro.", rating: 5 },
   { name: 'Mme Tchouamo', role: 'Directrice, PME à Douala', text: 'Notre réseau et notre vidéosurveillance ont été refaits en 2 semaines. Zéro interruption pendant les travaux. Je recommande vivement.', rating: 5 },
@@ -58,7 +44,16 @@ const TESTIMONIALS = [
 /* ================================================================== */
 export default async function HomePage() {
   
-  /* --- RÉCUPÉRATION DES PRODUITS VIA L'API (Comme sur la page Boutique) --- */
+  // 👇 1. RÉCUPÉRATION DES VRAIS CHIFFRES DEPUIS TURSO
+  let statsData: any[] = [];
+  try {
+    const statsRes = await turso.execute('SELECT * FROM settings');
+    statsData = statsRes.rows;
+  } catch (error) {
+    console.error("Erreur chargement stats:", error);
+  }
+
+  // 👇 2. RÉCUPÉRATION DES PRODUITS POUR LA BOUTIQUE
   let dbProducts: any[] = [];
   try {
     // On récupère l'URL dynamiquement pour que ça marche en local et sur Vercel
@@ -66,19 +61,24 @@ export default async function HomePage() {
     const host = headersList.get('host');
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
     
-    // On appelle l'API qui fonctionne déjà
     const res = await fetch(`${protocol}://${host}/api/products`, { cache: 'no-store' });
     
     if (res.ok) {
       const allProducts = await res.json();
       // On mélange les produits et on en garde 10 au hasard
-      dbProducts = [...allProducts]
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 10);
+      dbProducts = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 10);
     }
   } catch (error) {
-    console.error("Erreur lors de la récupération des produits pour l'accueil :", error);
+    console.error("Erreur chargement produits:", error);
   }
+
+  // 👇 3. CONSTRUCTION DU TABLEAU STATS
+  const STATS = [
+    { value: statsData.find(s => s.key === 'projects')?.value || '25+', label: statsData.find(s => s.key === 'projects')?.label || 'Projets livrés', icon: FaAward },
+    { value: statsData.find(s => s.key === 'regions')?.value || '10', label: statsData.find(s => s.key === 'regions')?.label || 'Régions couvertes', icon: FaUsers },
+    { value: statsData.find(s => s.key === 'responseTime')?.value || '24h', label: statsData.find(s => s.key === 'responseTime')?.label || 'Devis gratuit', icon: FaClock },
+    { value: statsData.find(s => s.key === 'warranty')?.value || '12', label: statsData.find(s => s.key === 'warranty')?.label || 'Mois de garantie', icon: FaShieldAlt },
+  ];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#EAF3FF] via-[#DCEBFF] to-[#E6FBFF]">
@@ -109,9 +109,7 @@ export default async function HomePage() {
                 vos bâtiments
               </h1>
               <p className="mb-8 max-w-xl text-lg text-gray-700 md:text-xl">
-                Intégrateur camerounais de solutions techniques du bâtiment.
-                Un seul partenaire pour l'électricité, le solaire, le réseau,
-                la sécurité, la domotique et l'automatisation.
+                Intégrateur camerounais de solutions techniques du bâtiment. Un seul partenaire pour l'électricité, le solaire, le réseau, la sécurité, la domotique et l'automatisation.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/devis" className="rounded-full bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-8 py-3 font-semibold text-white shadow-lg shadow-[#0066FF]/30 transition hover:-translate-y-0.5 hover:shadow-xl">
@@ -157,7 +155,7 @@ export default async function HomePage() {
       </section>
 
       {/* ============================================================ */}
-      {/*  2. STATS                                                    */}
+      {/*  2. STATS (Dynamiques)                                       */}
       {/* ============================================================ */}
       <section className="relative z-10 py-12">
         <div className="container mx-auto px-4">
@@ -183,9 +181,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
             <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">Nos solutions</span>
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
-              Six domaines, <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">un seul partenaire</span>
-            </h2>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Six domaines, <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">un seul partenaire</span></h2>
             <p className="mx-auto max-w-2xl text-gray-600">Tous les lots techniques de votre bâtiment, conçus, installés et maintenus par une seule équipe.</p>
           </div>
 
@@ -226,9 +222,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
             <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">Pourquoi nous choisir</span>
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
-              Ce qui nous <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">différencie</span>
-            </h2>
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Ce qui nous <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">différencie</span></h2>
             <p className="mx-auto max-w-2xl text-gray-600">Six engagements concrets qui font la différence sur chaque projet.</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
