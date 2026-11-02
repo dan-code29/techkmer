@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { headers } from 'next/headers'; // 👈 NOUVEL IMPORT IMPORTANT
+import TestimonialForm from '@/components/TestimonialForm';
 import {
   FaArrowRight, FaCheckCircle, FaPhoneAlt,
   FaShieldAlt, FaSun, FaNetworkWired, FaHome, FaBolt, FaCog,
@@ -7,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import { turso } from '@/lib/turso';
 import HomeRealisations from '@/components/HomeRealisations';
+import TestimonialSection from '@/components/TestimonialSection';
 import { SOLUTIONS } from '@/lib/solutions';
 import HomeBoutique from '@/components/HomeBoutique';
 
@@ -79,6 +81,18 @@ export default async function HomePage() {
     { value: statsData.find(s => s.key === 'responseTime')?.value || '24h', label: statsData.find(s => s.key === 'responseTime')?.label || 'Devis gratuit', icon: FaClock },
     { value: statsData.find(s => s.key === 'warranty')?.value || '12', label: statsData.find(s => s.key === 'warranty')?.label || 'Mois de garantie', icon: FaShieldAlt },
   ];
+    // 👇 RÉCUPÉRATION DES AVIS CLIENTS
+  let dbTestimonials: any[] = [];
+  try {
+    const res = await turso.execute("SELECT * FROM testimonials ORDER BY created_at DESC LIMIT 6");
+        // On transforme les objets de Turso en objets simples pour Next.js
+    dbTestimonials = res.rows.map(row => ({ ...row })); 
+  } catch (error) {
+    console.error("Erreur chargement avis:", error);
+  }
+  
+  // Si la base est vide, on garde tes faux avis pour ne pas avoir une page vide
+  const displayTestimonials = dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#EAF3FF] via-[#DCEBFF] to-[#E6FBFF]">
@@ -97,57 +111,81 @@ export default async function HomePage() {
       <section className="relative z-10">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-            <div>
-              <span className="mb-5 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">
-                CHEFFBUILD Smart Systems
-              </span>
-              <h1 className="mb-6 text-4xl font-bold leading-tight text-gray-900 md:text-5xl lg:text-6xl">
-                Connecter, sécuriser et{' '}
-                <span className="animate-gradient bg-gradient-to-r from-[#0066FF] via-[#00C2FF] to-[#0066FF] bg-clip-text text-transparent">
-                  automatiser
-                </span>{' '}
-                vos bâtiments
-              </h1>
-              <p className="mb-8 max-w-xl text-lg text-gray-700 md:text-xl">
-                Intégrateur camerounais de solutions techniques du bâtiment. Un seul partenaire pour l'électricité, le solaire, le réseau, la sécurité, la domotique et l'automatisation.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/devis" className="rounded-full bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-8 py-3 font-semibold text-white shadow-lg shadow-[#0066FF]/30 transition hover:-translate-y-0.5 hover:shadow-xl">
-                  Demander un devis
-                </Link>
-                <Link href="/solutions" className="rounded-full border border-gray-300 bg-white/80 px-8 py-3 font-semibold text-gray-800 backdrop-blur transition hover:-translate-y-0.5 hover:border-[#0066FF]/40 hover:bg-white">
-                  Découvrir nos solutions
-                </Link>
-              </div>
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-600">
-                <span className="flex items-center gap-1.5"><FaCheckCircle className="text-[#00C2FF]" size={14} /> Devis gratuit</span>
-                <span className="flex items-center gap-1.5"><FaCheckCircle className="text-[#00C2FF]" size={14} /> Réponse sous 24h</span>
-                <span className="flex items-center gap-1.5"><FaCheckCircle className="text-[#00C2FF]" size={14} /> Garantie 12 mois</span>
+                        {/* COLONNE GAUCHE AVEC IMAGE DE FOND */}
+            <div className="relative overflow-hidden rounded-[2.5rem] p-8 md:p-10 border border-white/60 bg-white/40 backdrop-blur-md shadow-xl shadow-[#0066FF]/5">
+              
+              {/* 1. L'image de fond (opacité réduite pour ne pas agresser) */}
+              <div 
+                className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-30"
+              />
+              
+              {/* 2. Le dégradé blanc (Garantit que le texte reste lisible) */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent" />
+
+              {/* 3. Ton contenu (z-10 pour passer au-dessus de l'image) */}
+              <div className="relative z-10">
+                <span className="mb-5 inline-block rounded-full border border-[#0066FF]/30 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md shadow-sm">
+                  CHEFFBUILD Smart Systems
+                </span>
+                <h1 className="mb-6 text-4xl font-bold leading-tight text-gray-900 md:text-5xl lg:text-6xl">
+                  Connecter, sécuriser et{' '}
+                  <span className="animate-gradient bg-gradient-to-r from-[#0066FF] via-[#00C2FF] to-[#0066FF] bg-clip-text text-transparent">
+                    automatiser
+                  </span>{' '}
+                  vos bâtiments
+                </h1>
+                <p className="mb-8 max-w-xl text-lg text-gray-800 md:text-xl font-medium">
+                  Intégrateur camerounais de solutions techniques du bâtiment. Un seul partenaire pour l'électricité, le solaire, le réseau, la sécurité, la domotique et l'automatisation.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/devis" className="rounded-full bg-gradient-to-r from-[#0066FF] to-[#00C2FF] px-8 py-3 font-semibold text-white shadow-lg shadow-[#0066FF]/30 transition hover:-translate-y-0.5 hover:shadow-xl">
+                    Demander un devis
+                  </Link>
+                  <Link href="/solutions" className="rounded-full border border-gray-300 bg-white/90 px-8 py-3 font-semibold text-gray-800 backdrop-blur transition hover:-translate-y-0.5 hover:border-[#0066FF]/40 hover:bg-white">
+                    Découvrir nos solutions
+                  </Link>
+                </div>
+                <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-medium text-gray-700">
+                  <span className="flex items-center gap-1.5"><FaCheckCircle className="text-[#00C2FF]" size={14} /> Devis gratuit</span>
+                  <span className="flex items-center gap-1.5"><FaCheckCircle className="text-[#00C2FF]" size={14} /> Réponse sous 24h</span>
+                  <span className="flex items-center gap-1.5"><FaCheckCircle className="text-[#00C2FF]" size={14} /> Garantie 12 mois</span>
+                </div>
               </div>
             </div>
+            {/* Visuel : grille des 5 solutions avec fond */}
+            <div className="relative group">
+              
+              {/* 1. Le fond "verre dépoli" principal */}
+              <div className="absolute inset-0 -m-4 rounded-[2.5rem] bg-white/40 backdrop-blur-xl border border-white/60 shadow-2xl shadow-[#0066FF]/10 z-0" />
+              
+              {/* 2. Halos lumineux pour la profondeur */}
+              <div className="absolute -top-10 -right-10 w-48 h-48 bg-[#00C2FF]/20 rounded-full blur-3xl z-0" />
+              <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#0066FF]/20 rounded-full blur-3xl z-0" />
 
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-3">
-                {SOLUTIONS.slice(0, 4).map((s) => (
-                  <Link key={s.slug} href={`/solutions/${s.slug}`} className={`group rounded-2xl border-2 bg-white/70 p-5 backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/90 hover:shadow-xl ${s.colors.border}`}>
-                    <div className="mb-2 text-3xl">{s.icon}</div>
-                    <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500">{s.tagline}</div>
-                    <div className="mt-1 text-sm font-bold text-gray-900 group-hover:text-[#0066FF]">{s.name.replace('CHEFFBUILD ', '')}</div>
+              {/* 3. Le contenu (z-10 pour passer au-dessus du fond) */}
+              <div className="relative z-10">
+                <div className="grid grid-cols-2 gap-3">
+                  {SOLUTIONS.slice(0, 4).map((s) => (
+                    <Link key={s.slug} href={`/solutions/${s.slug}`} className={`group rounded-2xl border-2 bg-white/80 p-5 backdrop-blur-md transition hover:-translate-y-1 hover:bg-white hover:shadow-xl ${s.colors.border}`}>
+                      <div className="mb-2 text-3xl">{s.icon}</div>
+                      <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500">{s.tagline}</div>
+                      <div className="mt-1 text-sm font-bold text-gray-900 group-hover:text-[#0066FF]">{s.name.replace('CHEFFBUILD ', '')}</div>
+                    </Link>
+                  ))}
+                </div>
+                
+                {SOLUTIONS[4] && (
+                  <Link href={`/solutions/${SOLUTIONS[4].slug}`} className={`group mt-3 flex items-center gap-4 rounded-2xl border-2 bg-white/80 p-5 backdrop-blur-md transition hover:-translate-y-1 hover:bg-white hover:shadow-xl ${SOLUTIONS[4].colors.border}`}>
+                    <span className="text-4xl">{SOLUTIONS[4].icon}</span>
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500">{SOLUTIONS[4].tagline}</div>
+                      <div className="text-sm font-bold text-gray-900">{SOLUTIONS[4].name.replace('CHEFFBUILD ', '')}</div>
+                    </div>
                   </Link>
-                ))}
-              </div>
-              {SOLUTIONS[4] && (
-                <Link href={`/solutions/${SOLUTIONS[4].slug}`} className={`group mt-3 flex items-center gap-4 rounded-2xl border-2 bg-white/70 p-5 backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/90 hover:shadow-xl ${SOLUTIONS[4].colors.border}`}>
-                  <span className="text-4xl">{SOLUTIONS[4].icon}</span>
-                  <div>
-                    <div className="text-[11px] font-bold uppercase tracking-widest text-gray-500">{SOLUTIONS[4].tagline}</div>
-                    <div className="text-sm font-bold text-gray-900">{SOLUTIONS[4].name.replace('CHEFFBUILD ', '')}</div>
-                  </div>
-                </Link>
-              )}
-              <div className="absolute -bottom-4 -left-4 rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-lg backdrop-blur-md">
-                <div className="text-xs font-semibold uppercase tracking-wider text-[#0066FF]">Intégrateur</div>
-                <div className="text-sm font-medium text-gray-900">Tous les lots techniques</div>
+                )}
+                
+                {/* Badge flottant Intégrateur */}
+                
               </div>
             </div>
           </div>
@@ -273,33 +311,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
+      
+            {/* ============================================================ */}
       {/*  8. TÉMOIGNAGES                                              */}
       {/* ============================================================ */}
-      <section className="relative z-10 py-20">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <span className="mb-3 inline-block rounded-full border border-[#0066FF]/30 bg-white/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#0066FF] backdrop-blur-md">Témoignages</span>
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Ils nous font <span className="animate-gradient bg-gradient-to-r from-[#0066FF] to-[#00C2FF] bg-clip-text text-transparent">confiance</span></h2>
-            <p className="mx-auto max-w-2xl text-gray-600">Ce que nos clients disent de nous après leur projet.</p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="rounded-2xl border border-white/70 bg-white/70 p-6 backdrop-blur-md">
-                <FaQuoteLeft className="mb-3 text-[#00C2FF]/40" size={24} />
-                <p className="mb-5 text-sm leading-relaxed text-gray-700 italic">« {t.text} »</p>
-                <div className="flex items-center gap-1 text-yellow-400">
-                  {Array.from({ length: t.rating }).map((_, i) => (<span key={i}>★</span>))}
-                </div>
-                <div className="mt-3 border-t border-gray-200 pt-3">
-                  <div className="font-semibold text-gray-900">{t.name}</div>
-                  <div className="text-xs text-gray-500">{t.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+       <div className="relative z-10">
+        <TestimonialSection testimonials={displayTestimonials} />
+      </div>
 
       {/* ============================================================ */}
       {/*  9. CTA FINAL                                                */}
