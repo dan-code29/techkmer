@@ -5,30 +5,32 @@ import { useEffect } from 'react';
 
 export default function BotpressChat() {
   useEffect(() => {
-    // Fonction pour forcer la configuration dès que Botpress est prêt
+    // Fonction pour forcer la configuration
     const forceBotpressConfig = () => {
-      // On vérifie si l'objet botpress existe sur la page
       if (typeof window !== 'undefined' && (window as any).botpress) {
         const botpress = (window as any).botpress;
         
-        // On écrase la configuration avec notre image (URL absolue)
+        // On récupère l'adresse actuelle (localhost:3000 ou vercel)
+        const currentDomain = window.location.origin; 
+        
+        // 👇 CORRECTION ICI : On retire "/images/" car l'image est directement dans public/
+        const myImageUrl = `${currentDomain}/danielpp.jpg`;
+
         botpress.config({
           configuration: {
-            fabImage: 'https://techkmer.vercel.app/images/danielpp.jpg',
-            botAvatar: 'https://techkmer.vercel.app/images/danielpp.jpg',
+            fabImage: myImageUrl,
+            botAvatar: myImageUrl,
           }
         });
-        console.log('✅ Configuration Botpress forcée avec la nouvelle image');
+        console.log('✅ Configuration Botpress forcée avec :', myImageUrl);
       }
     };
 
-    // On attend que le script inject.js soit chargé pour appeler la config
-    // On vérifie toutes les 500ms pendant 10 secondes max
     let attempts = 0;
     const interval = setInterval(() => {
       forceBotpressConfig();
       attempts++;
-      if (attempts > 20) clearInterval(interval); // On arrête après 10s
+      if (attempts > 20) clearInterval(interval);
     }, 500);
 
     return () => clearInterval(interval);
@@ -36,18 +38,28 @@ export default function BotpressChat() {
 
   return (
     <>
-      {/* Premier script : inject.js (indispensable) */}
       <Script
         src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"
         strategy="afterInteractive"
         onLoad={() => console.log('Botpress inject.js chargé')}
       />
-      {/* Second script : config générée par le dashboard */}
       <Script
         src="https://files.bpcontent.cloud/2026/06/01/15/20260601152716-KLL3C3FJ.js"
         strategy="afterInteractive"
         onLoad={() => console.log('Botpress config chargée')}
       />
+
+      {/* 👇 CSS DE SECOURS : Force l'image même si le script de Botpress échoue */}
+      <style jsx global>{`
+        .bpFabImage {
+          content: url('/danielpp.jpg') !important;
+          border-radius: 50% !important;
+          object-fit: cover !important;
+        }
+        .bpHeaderAvatar, .bpChatHeaderAvatar {
+          content: url('/danielpp.jpg') !important;
+        }
+      `}</style>
     </>
   );
 }
