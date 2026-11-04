@@ -5,15 +5,12 @@ import { useEffect } from 'react';
 
 export default function BotpressChat() {
   useEffect(() => {
-    // Fonction pour forcer la configuration
     const forceBotpressConfig = () => {
       if (typeof window !== 'undefined' && (window as any).botpress) {
         const botpress = (window as any).botpress;
-        
-        // On récupère l'adresse actuelle (localhost:3000 ou vercel)
         const currentDomain = window.location.origin; 
         
-        // 👇 CORRECTION ICI : On retire "/images/" car l'image est directement dans public/
+        // Chemin vers l'image qui se trouve directement dans le dossier public
         const myImageUrl = `${currentDomain}/danielpp.jpg`;
 
         botpress.config({
@@ -22,7 +19,6 @@ export default function BotpressChat() {
             botAvatar: myImageUrl,
           }
         });
-        console.log('✅ Configuration Botpress forcée avec :', myImageUrl);
       }
     };
 
@@ -38,18 +34,14 @@ export default function BotpressChat() {
 
   return (
     <>
-      <Script
-        src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"
-        strategy="afterInteractive"
-        onLoad={() => console.log('Botpress inject.js chargé')}
-      />
-      <Script
-        src="https://files.bpcontent.cloud/2026/06/01/15/20260601152716-KLL3C3FJ.js"
-        strategy="afterInteractive"
-        onLoad={() => console.log('Botpress config chargée')}
-      />
+      {/* 👇 LES SCRIPTS DE TON EMBED CODE (Version 3.7) 👇 */}
+      {/* Remplace le lien ci-dessous par le lien complet de ton premier script */}
+     
+    <script src="https://cdn.botpress.cloud/webchat/v3.7/inject.js"></script>
+<script src="https://files.bpcontent.cloud/2026/06/01/15/20260601152716-KLL3C3FJ.js" defer></script>
+    
 
-      {/* 👇 CSS DE SECOURS : Force l'image même si le script de Botpress échoue */}
+      {/* CSS DE SECOURS POUR L'IMAGE */}
       <style jsx global>{`
         .bpFabImage {
           content: url('/danielpp.jpg') !important;
